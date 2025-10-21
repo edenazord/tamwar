@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Carica della Cavalleria</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2" />
+</head>
+<body class="bg-dark gradient">
+  <header class="app-bar">
+    <div class="logo"><span class="crown">🏇</span><span>Carica della Cavalleria</span></div>
+    <div class="status"><span id="teamName" class="chip"></span><span id="wave" class="chip"></span></div>
+  </header>
+  <main class="container">
+    <div class="arena card glass pop-in">
+      <canvas id="curve" class="curve"></canvas>
+      <div class="actions">
+        <button id="btnCharge" class="btn btn-primary big pulse">Carica!</button>
+      </div>
+      <div class="powers">
+        <button id="caltrap" class="chip chip-power">Caltrop</button>
+        <button id="horn" class="chip chip-power">Tromba</button>
+      </div>
+      <div id="feed" class="feed"></div>
+    </div>
+  </main>
+  <footer class="footer">3 Ondate • Finestra 600–900 ms • Demo mock realtime</footer>
+  <script src="carica.js?v=2"></script>
+</body>
+</html>

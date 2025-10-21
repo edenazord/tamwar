@@ -1,0 +1,24 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Editor/IDE
+.vscode/
+.idea/
+*.code-workspace
+
+# Node (future-proof)
+node_modules/
+dist/
+.build/
+.cache/
+
+# Python (if you use a tiny server)
+__pycache__/
+*.pyc
