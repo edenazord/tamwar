@@ -1,8 +1,8 @@
-name: Deploy static site to Pages
+name: Deploy static site to Pages (disabled on main)
 
 on:
   push:
-    branches: ["main"]
+    branches: ["gh-pages"]
   workflow_dispatch:
 
 permissions:
