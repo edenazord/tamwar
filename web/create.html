@@ -13,15 +13,8 @@
   </header>
   <main class="container">
     <div class="card glass" style="max-width:720px;margin:0 auto">
-      <h2>Impostazioni Serie</h2>
-      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
-        <label for="nameA">Nome Re A</label>
-        <input id="nameA" type="text" placeholder="Streamer A" style="flex:1 1 200px; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
-      </div>
-      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
-        <label for="nameB">Nome Re B</label>
-        <input id="nameB" type="text" placeholder="Streamer B" style="flex:1 1 200px; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
-      </div>
+      <h2>Impostazioni Partita</h2>
+      <!-- Nomi derivati dai login: mostrati nel pannello schieramenti, non modificabili qui -->
       <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
         <label>Best Of:</label>
         <label><input type="radio" name="bestof" value="3" checked> BO3</label>
@@ -31,15 +24,19 @@
         <label for="mgpr">Minigiochi per Rush</label>
         <input id="mgpr" type="number" min="1" max="9" value="3" style="width:80px; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
       </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <button id="btnGen" class="btn btn-accent">Genera link</button>
-        <button id="btnCopy" class="btn btn-ghost" disabled>Copia link</button>
-        <a id="joinLink" href="#" class="btn btn-primary" target="_blank" rel="noopener" style="display:none">Apri link</a>
+      <div id="linkBox" class="card" style="background:#0b102022; border:1px dashed #223; padding:12px;">
+        <div id="linkLabel" style="font-weight:700; margin-bottom:6px;">Link corrente</div>
+        <a id="actionLink" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#93c5fd;">—</a>
+      </div>
+      <div id="statusBar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="btnWaiting" class="btn" disabled>ATTESA SFIDANTE</button>
+        <button id="btnAccepted" class="btn" disabled style="display:none">ACCETTATA</button>
       </div>
       <p id="out" class="subtitle" style="margin-top:10px"></p>
     </div>
   </main>
   <script src="state.js?v=1"></script>
+  <script src="auth.js?v=1"></script>
   <script src="create.js?v=1"></script>
 </body>
 </html>

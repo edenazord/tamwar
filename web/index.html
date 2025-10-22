@@ -3,29 +3,71 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Re & Esercito — Login</title>
-  <meta http-equiv="Cache-Control" content="no-store" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <title>Re & Esercito — Crea Partita</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><text y=%2224%22 font-size=%2224%22>👑</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=2" />
 </head>
-<body class="bg-dark gradient">
+<body class="bg-dark gradient body-full">
   <header class="app-bar">
-    <div class="logo">
-      <span class="crown">👑</span>
-      <span>Re & Esercito</span>
-    </div>
+    <div class="logo"><span class="crown">👑</span><span>Crea Partita</span></div>
   </header>
-  <main class="container center">
-    <section class="card glass pop-in">
-      <h1 class="title neon">Entra con Twitch</h1>
-      <p class="subtitle">Scegli il tuo Re e guida l'esercito.</p>
-      <button id="btnLogin" class="btn btn-primary pulse">🎮 Login con Twitch</button>
-      <p class="hint">Demo: il login è simulato. Premi per continuare.</p>
+  <main class="container">
+    <div id="loginCard" class="card glass" style="max-width:720px;margin:0 auto; display:none">
+      <h2>Accedi come Streamer A</h2>
+      <p class="subtitle">Per creare la partita devi essere autenticato come Streamer A.</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button id="btnLoginA" class="btn btn-primary">Login con Twitch (Streamer A)</button>
+      </div>
+    </div>
+
+    <div id="createCard" class="card glass" style="max-width:720px;margin:18px auto 0; display:none">
+      <h2>Impostazioni Partita</h2>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
+        <label>Best Of:</label>
+        <label><input type="radio" name="bestof" value="3" checked> BO3</label>
+        <label><input type="radio" name="bestof" value="5"> BO5</label>
+      </div>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
+        <label for="mgpr">Minigiochi per Rush</label>
+        <input id="mgpr" type="number" min="1" max="9" value="3" style="width:80px; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
+      </div>
+      <div style="margin-top:12px; display:none" id="startBox">
+        <button id="btnStart" class="btn btn-primary big" disabled>Inizia Sfida</button>
+      </div>
+      <div id="statusBar" style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        <button id="btnWaiting" class="btn" disabled>ATTESA SFIDANTE</button>
+        <button id="btnAccepted" class="btn" disabled style="display:none">ACCETTATA</button>
+      </div>
+      <p id="out" class="subtitle" style="margin-top:10px"></p>
+    </div>
+
+    <div id="linkBox" class="card" style="background:#0b102022; border:1px dashed #223; padding:12px; max-width:980px; margin:16px auto;">
+      <div id="linkLabel" style="font-weight:700; margin-bottom:6px;">Link corrente</div>
+      <a id="actionLink" href="#" target="_blank" rel="noopener" style="word-break:break-all; color:#93c5fd;">—</a>
+    </div>
+
+    <!-- Pre-start preview: replica grafica choose (solo visualizzazione) -->
+  <section id="prestartPanel" class="container" style="display:none; max-width:980px;">
+      <h2 class="title neon text-center">Schieramenti</h2>
+      <div class="grid two pop-in" style="max-width:980px;margin:0 auto;width:100%">
+        <div class="card" data-team="A">
+          <img id="preImgA" class="avatar" width="640" height="360" alt="Re A" />
+          <h2 id="preNameA" class="accent">Streamer A</h2>
+          <div class="meta"><span class="badge" id="preCountA">0</span> hanno giurato</div>
+          <button class="btn btn-accent" disabled>Giura Fedeltà</button>
+        </div>
+        <div class="card" data-team="B">
+          <img id="preImgB" class="avatar" width="640" height="360" alt="Re B" />
+          <h2 id="preNameB" class="accent">Streamer B</h2>
+          <div class="meta"><span class="badge" id="preCountB">0</span> hanno giurato</div>
+          <button class="btn btn-accent" disabled>Giura Fedeltà</button>
+        </div>
+      </div>
     </section>
   </main>
-  <footer class="footer">© 2025 Re & Esercito</footer>
-  <script src="main.js?v=2"></script>
+  <script src="state.js?v=1"></script>
+  <script src="auth.js?v=1"></script>
+  <script src="create.js?v=1"></script>
 </body>
 </html>

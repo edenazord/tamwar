@@ -1,26 +1,28 @@
 (function(){
   const html = `
-  <div id="gameHud" class="game-hud glass card">
-    <div class="side a">
-      <img id="hudImgA" class="avatar tiny" alt="A"/>
-      <span id="hudNameA" class="nm">Re A</span>
-    </div>
-    <div class="score">
-      <div class="line"><span id="hudScoreA">0</span> — <span id="hudScoreB">0</span></div>
-      <div class="sub">Rush <span id="hudRushIndex">1</span> • <span id="hudBestOf">BO3</span></div>
-      <div class="sub">Giuramenti: <span id="hudAllegA">0</span> | <span id="hudAllegB">0</span></div>
-    </div>
-    <div class="side b">
-      <span id="hudNameB" class="nm">Re B</span>
-      <img id="hudImgB" class="avatar tiny" alt="B"/>
-    </div>
-  </div>`;
+    <div class="hud-center"><div id="gameHud" class="game-hud">
+      <div class="side a">
+        <img id="hudImgA" class="avatar tiny" alt="A"/>
+        <span id="hudNameA" class="nm">Re A</span>
+      </div>
+      <div class="score">
+        <div class="line"><span id="hudScoreA">0</span> — <span id="hudScoreB">0</span></div>
+        <div class="sub">Rush <span id="hudRushIndex">1</span> • <span id="hudBestOf">BO3</span></div>
+        <div class="sub">Giuramenti: <span id="hudAllegA">0</span> | <span id="hudAllegB">0</span></div>
+      </div>
+      <div class="side b">
+        <span id="hudNameB" class="nm">Re B</span>
+        <img id="hudImgB" class="avatar tiny" alt="B"/>
+      </div>
+    </div></div>`;
 
   function ensureMount(){
-    if (!document.getElementById('gameHud')){
+    const bar = document.querySelector('.app-bar');
+    if (!bar) return;
+    if (!bar.querySelector('#gameHud')){
       const wrap = document.createElement('div');
       wrap.innerHTML = html;
-      document.body.appendChild(wrap.firstElementChild);
+      bar.appendChild(wrap.firstElementChild);
     }
   }
   function $(id){ return document.getElementById(id); }

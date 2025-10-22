@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2" />
+  <script>
+    // Imposta qui (opzionale) per login Twitch reale
+    window.TWITCH_CLIENT_ID = '';
+    window.TWITCH_REDIRECT_URI = location.origin + location.pathname; // questa pagina
+  </script>
+</head>
+<body class="bg-dark gradient body-full">
+  <header class="app-bar"><div class="logo"><span class="crown">👑</span><span>Login</span></div></header>
+  <main class="container">
+    <div class="card glass" style="max-width:720px;margin:0 auto">
+      <h2>Accedi</h2>
+      <p class="subtitle">Scegli il tuo ruolo per accedere con Twitch.</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button class="btn btn-primary" onclick="sessionStorage.setItem('after_login', 'index.html'); Auth.login('A')">Login come Streamer A</button>
+        <button class="btn btn-accent" onclick="sessionStorage.setItem('after_login', 'confirm.html'+location.search); Auth.login('B')">Login come Streamer B</button>
+      </div>
+    </div>
+  </main>
+  <script src="auth.js?v=1"></script>
+  <script>Auth.init()</script>
+</body>
+</html>

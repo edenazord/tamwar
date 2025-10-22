@@ -43,108 +43,103 @@ function safePath(p) {
   return filePath;
 }
 
-// In-memory match state
-const matches = Object.create(null);
-const json = (res, code, obj) => send(res, code, JSON.stringify(obj||{}), { 'Content-Type':'application/json; charset=utf-8' });
-const readJson = (req) => new Promise((resolve) => {
-  let body='';
-  req.on('data', (c)=> body += c);
-  req.on('end', ()=>{ try{ resolve(JSON.parse(body||'{}')); } catch(e){ resolve({}); } });
-});
-function id8(){ return Math.random().toString(16).slice(2,10) + Math.random().toString(16).slice(2,10); }
+// In-memory store for matches (demo only)
+const MATCHES = new Map();
+function parseBody(req) {
+  return new Promise((resolve) => {
+    let data = '';
+    req.on('data', chunk => { data += chunk; if (data.length > 1e6) req.socket.destroy(); });
+    req.on('end', () => {
+      try { resolve(JSON.parse(data || '{}')); } catch(e){ resolve({}); }
+    });
+  });
+}
 
 const server = http.createServer(async (req, res) => {
   const parsed = url.parse(req.url, true);
   const pathname = parsed.pathname || '/';
 
-  // API routes
+  // Minimal CORS for local testing
   if (pathname.startsWith('/api/')) {
-    if (pathname === '/api/createMatch' && req.method === 'POST') {
-      const body = await readJson(req);
-      const matchId = id8();
-      matches[matchId] = {
-        createdAt: Date.now(),
-        config: {
-          bestOf: body?.bestOf === 5 ? 5 : 3,
-          minigamesPerRush: Math.max(1, Math.min(9, parseInt(body?.minigamesPerRush||3,10)))
-        },
-        streamers: {
-          A: { name: body?.streamers?.A?.name || 'Streamer A', img: body?.streamers?.A?.img || '' },
-          B: { name: body?.streamers?.B?.name || 'Streamer B', img: body?.streamers?.B?.img || '' }
-        },
-        rushIndex: 1,
-        rushWins: { A: 0, B: 0 },
-        allegiance: { A: 0, B: 0 },
-        minigameIndex: 1,
-        minigameWins: { A: 0, B: 0 },
-      };
-      return json(res, 200, { ok:true, matchId });
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    if (req.method === 'OPTIONS') return send(res, 204, '');
+  }
+
+  // API routes
+  if (pathname === '/api/matches' && req.method === 'POST') {
+    const body = await parseBody(req);
+    const id = body.matchId;
+    if (!id) return send(res, 400, JSON.stringify({ error: 'matchId required' }), { 'Content-Type': 'application/json' });
+    const owner = body.ownerA; // { id, name }
+    if (!owner || !owner.id) return send(res, 400, JSON.stringify({ error: 'ownerA required' }), { 'Content-Type': 'application/json' });
+    const inviteKey = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    const record = {
+      id,
+      ownerA: owner,
+      invitedB: null,
+      config: body.config || { bestOf: 3, minigamesPerRush: 3, names: { A: 'Streamer A', B: 'Streamer B' } },
+      status: 'invited', // invited -> accepted -> running
+      inviteKey
+    };
+    MATCHES.set(id, record);
+    return send(res, 200, JSON.stringify({ ok: true, id, inviteKey }), { 'Content-Type': 'application/json' });
+  }
+  if (pathname.match(/^\/api\/matches\/[^/]+$/) && req.method === 'GET') {
+    const id = pathname.split('/').pop();
+    const rec = MATCHES.get(id);
+    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    return send(res, 200, JSON.stringify({ id: rec.id, status: rec.status, ownerA: rec.ownerA, invitedB: rec.invitedB, config: rec.config }), { 'Content-Type': 'application/json' });
+  }
+  if (pathname.match(/^\/api\/matches\/[^/]+\/invite-check$/) && req.method === 'GET') {
+    const id = pathname.split('/')[3];
+    const rec = MATCHES.get(id);
+    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    const token = parsed.query?.token || '';
+    if (rec.status !== 'invited' || !rec.inviteKey || token !== rec.inviteKey) {
+      return send(res, 410, JSON.stringify({ ok: false, error: 'invite consumed or invalid' }), { 'Content-Type': 'application/json' });
     }
-    if (pathname === '/api/state' && req.method === 'GET') {
-      const id = parsed.query.match;
-      const m = id && matches[id];
-      if (!m) return json(res, 404, { ok:false, error:'match-not-found' });
-      const need = Math.ceil(m.config.bestOf/2);
-      return json(res, 200, { ok:true, matchId:id, config: m.config, streamers:m.streamers, rushIndex:m.rushIndex, rushWins:m.rushWins, allegiance:m.allegiance, minigameIndex:m.minigameIndex, minigameWins:m.minigameWins, need });
-    }
-    if (pathname === '/api/allegiance' && req.method === 'POST') {
-      const id = parsed.query.match;
-      const m = id && matches[id];
-      if (!m) return json(res, 404, { ok:false, error:'match-not-found' });
-      const body = await readJson(req);
-      const team = body?.team === 'B' ? 'B' : 'A';
-      m.allegiance[team] = (m.allegiance[team]||0) + 1;
-      return json(res, 200, { ok:true, allegiance: m.allegiance });
-    }
-    if (pathname === '/api/reportMinigame' && req.method === 'POST') {
-      const id = parsed.query.match;
-      const m = id && matches[id];
-      if (!m) return json(res, 404, { ok:false, error:'match-not-found' });
-      const body = await readJson(req);
-      const team = body?.winner === 'B' ? 'B' : 'A';
-      m.minigameWins[team] = (m.minigameWins[team]||0) + 1;
-      m.minigameIndex += 1;
-      return json(res, 200, { ok:true, minigameWins:m.minigameWins, minigameIndex:m.minigameIndex });
-    }
-    if (pathname === '/api/finalizeRush' && req.method === 'POST') {
-      const id = parsed.query.match;
-      const m = id && matches[id];
-      if (!m) return json(res, 404, { ok:false, error:'match-not-found' });
-      const a = m.minigameWins.A|0, b = m.minigameWins.B|0;
-      if (a!==b) {
-        if (a>b) m.rushWins.A++; else m.rushWins.B++;
-      }
-      m.rushIndex += 1;
-      m.minigameIndex = 1;
-      m.minigameWins = {A:0,B:0};
-      // reset allegiance for new rush
-      m.allegiance = {A:0,B:0};
-      const need = Math.ceil(m.config.bestOf/2);
-      let winner = null;
-      if (m.rushWins.A >= need) winner = 'A';
-      if (m.rushWins.B >= need) winner = 'B';
-      return json(res, 200, { ok:true, rushWins:m.rushWins, rushIndex:m.rushIndex, winner });
-    }
-    return json(res, 404, { ok:false, error:'not-found' });
+    return send(res, 200, JSON.stringify({ ok: true }), { 'Content-Type': 'application/json' });
+  }
+  if (pathname.match(/^\/api\/matches\/[^/]+\/accept$/) && req.method === 'POST') {
+    const id = pathname.split('/')[3];
+    const rec = MATCHES.get(id);
+    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    const body = await parseBody(req);
+    if (rec.status !== 'invited' || !rec.inviteKey) return send(res, 410, JSON.stringify({ error: 'already accepted' }), { 'Content-Type': 'application/json' });
+    if (body.token !== rec.inviteKey) return send(res, 403, JSON.stringify({ error: 'bad token' }), { 'Content-Type': 'application/json' });
+    if (!body.b || !body.b.id) return send(res, 400, JSON.stringify({ error: 'b required' }), { 'Content-Type': 'application/json' });
+    rec.invitedB = body.b;
+    if (rec.config && rec.config.names) { rec.config.names.B = body.b.name || rec.config.names.B; }
+    rec.status = 'accepted';
+    rec.inviteKey = null; // invalidate invite link
+    return send(res, 200, JSON.stringify({ ok: true, id, status: rec.status }), { 'Content-Type': 'application/json' });
+  }
+  if (pathname.match(/^\/api\/matches\/[^/]+\/start$/) && req.method === 'POST') {
+    const id = pathname.split('/')[3];
+    const rec = MATCHES.get(id);
+    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    const body = await parseBody(req);
+    if (!body.actor || body.actor !== rec.ownerA.id) return send(res, 403, JSON.stringify({ error: 'owner only' }), { 'Content-Type': 'application/json' });
+    rec.status = 'running';
+    return send(res, 200, JSON.stringify({ ok: true, status: rec.status }), { 'Content-Type': 'application/json' });
   }
 
   // Static files
   let filePath = safePath(pathname === '/' ? '/index.html' : pathname);
   if (!filePath) return send(res, 403, 'Forbidden');
+
   fs.stat(filePath, (err, stat) => {
     if (!err && stat.isDirectory()) {
       filePath = path.join(filePath, 'index.html');
     }
     fs.readFile(filePath, (err2, data) => {
-      if (err2) {
-        return send(res, 404, 'Not Found');
-      }
+      if (err2) return send(res, 404, 'Not Found');
       const ext = path.extname(filePath).toLowerCase();
       const type = MIME[ext] || 'application/octet-stream';
       const headers = { 'Content-Type': type };
-      if (ext && ext !== '.html') {
-        headers['Cache-Control'] = 'public, max-age=0';
-      }
+      if (ext && ext !== '.html') headers['Cache-Control'] = 'public, max-age=0';
       res.writeHead(200, headers);
       res.end(data);
     });

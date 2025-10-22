@@ -20,6 +20,7 @@ function getParams(){
     mg: p.get('mg') ? parseInt(p.get('mg'),10) : null,
     nameA: p.get('nameA') || null,
     nameB: p.get('nameB') || null,
+    owner: p.get('owner') || null,
   };
 }
 
@@ -71,6 +72,14 @@ if (cardA && cardB) {
   bH2.textContent = params.nameB || decodeURIComponent(basename(imgB));
   // Persist streamer meta for HUDs
   if (window.GameState) {
+    // Host detection: only the creator (who has the local token) becomes host
+    if (params.match && params.owner) {
+      try {
+        const key = localStorage.getItem('tamwar_owner_'+params.match);
+        if (key && key === params.owner) sessionStorage.setItem('tamwar_host_'+params.match, '1');
+        else sessionStorage.removeItem('tamwar_host_'+params.match);
+      } catch(e){}
+    }
     // Initialize match when arriving with a match param
     if (params.match) {
       GameState.initMatch(params.match, {
@@ -106,6 +115,7 @@ for (const c of cards) {
     sessionStorage.setItem('teamName', name);
     sessionStorage.setItem('teamImg', img || '');
     const qs = params.match ? `?match=${encodeURIComponent(params.match)}` : '';
-    window.location.href = 'ariete.html' + qs;
+    // Avvia dal nuovo percorso dei minigiochi
+    window.location.href = 'minigiochi/ariete.html' + qs;
   });
 }

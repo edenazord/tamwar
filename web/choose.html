@@ -14,13 +14,6 @@
       <span class="crown">👑</span>
       <span>Re & Esercito</span>
     </div>
-    <div class="nav-counters">
-      <span class="pill">Match: <strong id="navMatch">–</strong></span>
-      <span class="pill">Serie: <strong id="navBestOf">BO3</strong> • Rush <strong id="navRushIndex">1</strong></span>
-      <span class="pill"><span id="navAName">Re A</span> Rush: <strong id="navSeriesA">0</strong> • <span id="navBName">Re B</span> Rush: <strong id="navSeriesB">0</strong></span>
-      <span class="pill">Giuramenti — <span id="navAName2">A</span>: <strong id="navAllegA">0</strong> • <span id="navBName2">B</span>: <strong id="navAllegB">0</strong></span>
-      <span class="pill" id="navWinner" style="display:none"></span>
-    </div>
   </header>
   <main class="container">
     <h1 class="title neon text-center">Scegli il tuo loRe</h1>
@@ -41,7 +34,28 @@
   </main>
   <footer class="footer full-overlay">Scegli con saggezza. Cambi solo tra i match.</footer>
   <script src="state.js?v=1"></script>
+  <script src="auth.js?v=1"></script>
   <script src="hud.js?v=1"></script>
   <script src="choose.js?v=2"></script>
+  <script>
+    // Mostra un pulsante "Inizia Partita" solo allo Streamer A dopo accettazione
+    (async function(){
+      function getParams(){ const p = new URLSearchParams(location.search); return { match: p.get('match')||'' }; }
+      const params = getParams();
+      const u = window.Auth?.currentUser();
+      if (!params.match || !u || u.role !== 'A') return;
+      try{
+        const s = await (await fetch(`/api/matches/${params.match}`)).json();
+        if (s && s.status === 'accepted' && s.ownerA && s.ownerA.id === u.id){
+          const btn = document.createElement('button');
+          btn.textContent = 'Inizia Partita';
+          btn.className = 'btn btn-primary';
+          btn.style.position = 'fixed'; btn.style.right = '16px'; btn.style.bottom = '16px'; btn.style.zIndex = '20';
+          btn.onclick = ()=>{ window.location.href = `minigiochi/ariete.html?match=${encodeURIComponent(params.match)}`; };
+          document.body.appendChild(btn);
+        }
+      } catch(e){}
+    })();
+  </script>
 </body>
 </html>

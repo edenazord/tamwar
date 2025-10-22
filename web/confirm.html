@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Conferma Partita (Streamer B)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2" />
+</head>
+<body class="bg-dark gradient body-full">
+  <header class="app-bar"><div class="logo"><span class="crown">🤝</span><span>Conferma Partita</span></div></header>
+  <main class="container">
+    <div class="card glass" style="max-width:720px;margin:0 auto">
+      <h2>Accetta l'invito</h2>
+      <p class="subtitle" id="desc">Carico dettagli…</p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <button id="btnLoginB" class="btn btn-ghost">Login Twitch (Streamer B)</button>
+        <button id="btnAccept" class="btn btn-primary" disabled>Accetta</button>
+      </div>
+      <p id="out" class="subtitle" style="margin-top:10px"></p>
+    </div>
+  </main>
+  <script src="auth.js?v=1"></script>
+  <script src="confirm.js?v=1"></script>
+</body>
+</html>
