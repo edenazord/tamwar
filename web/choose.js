@@ -119,3 +119,4 @@ for (const c of cards) {
     window.location.href = 'minigiochi/ariete.html' + qs;
   });
 }
+ 
