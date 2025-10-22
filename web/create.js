@@ -18,7 +18,6 @@
   const startBox = document.getElementById('startBox');
   const btnStart = document.getElementById('btnStart');
   const btnWaiting = document.getElementById('btnWaiting');
-  const btnAccepted = document.getElementById('btnAccepted');
   const preCardA = document.querySelector('#prestartPanel .card[data-team="A"]');
   const preCardB = document.querySelector('#prestartPanel .card[data-team="B"]');
 
@@ -84,9 +83,8 @@
 
   function show(el, yes){ if (el) el.style.display = yes ? '' : 'none'; }
   function setStatus(which){
-    // which: 'waiting' | 'accepted' | null
+    // which: 'waiting' | null
     if (btnWaiting) { btnWaiting.style.display = (which==='waiting') ? '' : 'none'; btnWaiting.disabled = true; }
-    if (btnAccepted) { btnAccepted.style.display = (which==='accepted') ? '' : 'none'; btnAccepted.disabled = true; }
   }
   function syncUI(){
     const u = window.Auth?.currentUser();
@@ -173,8 +171,8 @@
           if (linkLabel) linkLabel.textContent = 'Link pubblico';
           lockSettings(true);
           out.textContent = 'La partita è stata accettata dallo Streamer B. Condividi ora il link pubblico per schierarsi.';
-          // status buttons: mostra solo il bottone accepted
-          setStatus('accepted');
+          // status buttons: nessun bottone dopo accettazione (c'è Inizia Sfida)
+          setStatus(null);
           if (window.GameState){ GameState.setStreamers({ B: { name: decodeURIComponent(nameB2) } }); }
           sessionStorage.removeItem('tam_current_match');
           // Show pre-start preview and start button
@@ -222,7 +220,7 @@
                 if (prePanel) prePanel.style.display = '';
                 if (startBox) startBox.style.display = '';
                 if (btnStart) btnStart.disabled = false;
-                setStatus('accepted');
+                setStatus(null);
                 startPrestartRender();
                 if (window.GameState){
                   GameState.initMatch(CURRENT.id, { bestOf: CURRENT.bo, minigamesPerRush: CURRENT.mg, streamers: { A: { name: decodeURIComponent(nameA2) }, B: { name: decodeURIComponent(nameB2) } } });
@@ -248,7 +246,7 @@
           if (actionLink){ actionLink.href = joinB; actionLink.textContent = joinB; }
           if (linkLabel) linkLabel.textContent = 'Link pubblico';
           if (prePanel) prePanel.style.display = '';
-          setStatus('accepted');
+          setStatus(null);
           if (startBox) startBox.style.display = 'none';
           if (btnStart) btnStart.disabled = true;
           startPrestartRender();
