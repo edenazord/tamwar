@@ -152,8 +152,27 @@
     // poll acceptance to unlock spectators link
     const poll = setInterval(async () => {
       try{
+        console.log(`Polling match status for ID: ${id}`);
         const res = await fetch(`/api/matches/${id}`);
-        if (!res.ok) return; // retry
+        if (!res.ok) {
+          console.log(`API call failed with status: ${res.status} ${res.statusText}`);
+          if (res.status === 404) {
+            console.log('Match not found - may need to recreate or check KV configuration');
+            // After several 404s, show error to user
+            if (!poll.retryCount) poll.retryCount = 0;
+            poll.retryCount++;
+            if (poll.retryCount > 10) {
+              clearInterval(poll);
+              out.textContent = 'Errore: Partita non trovata. Ricrea la partita o verifica la configurazione del server.';
+              return;
+            }
+          } else if (res.status === 503) {
+            clearInterval(poll);
+            out.textContent = 'Errore: Servizio database non configurato. Contatta l\'amministratore.';
+            return;
+          }
+          return; // retry
+        }
         const s = await res.json();
         if (s && s.status === 'accepted'){
           clearInterval(poll);
@@ -181,7 +200,20 @@
           if (prePanel) prePanel.style.display = '';
           startPrestartRender();
         }
-      } catch(e){ /* silent retry */ }
+      } catch(e){ 
+        console.error('Polling error:', e);
+        // Ignore extension communication errors that don't affect functionality
+        if (e.message && e.message.includes('Receiving end does not exist')) {
+          return; // Continue polling, ignore extension errors
+        }
+        // For other errors, show to user after several attempts
+        if (!poll.errorCount) poll.errorCount = 0;
+        poll.errorCount++;
+        if (poll.errorCount > 5) {
+          clearInterval(poll);
+          out.textContent = 'Errore di comunicazione. Ricarica la pagina e riprova.';
+        }
+      }
     }, 2000);
   }
 
