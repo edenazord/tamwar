@@ -10,23 +10,16 @@
 <body class="bg-dark gradient">
   <header class="app-bar">
     <div class="logo"><span class="crown">🛡️</span><span>Assedio all'Ariete</span></div>
-    <div class="status"><span id="teamName" class="chip"></span> <button id="btnSettings" class="btn btn-ghost">⚙️ Impostazioni</button></div>
-  </header>
-  <nav id="seriesNav" class="series-navbar">
-    <div class="wrap">
-      <div class="left">
-        <span class="pill">Match: <strong id="navMatchId">—</strong></span>
-        <span class="pill">Best‑of Rush: <strong id="navBestOf">BO3</strong></span>
-        <span class="pill">Rush <strong id="navRushIndex">1</strong></span>
-      </div>
-      <div class="right">
-        <span class="pill">Giuramenti A: <strong id="navAlA">0</strong></span>
-        <span class="pill">Giuramenti B: <strong id="navAlB">0</strong></span>
-        <span class="pill">Rush vinti A: <strong id="navWinsA">0</strong></span>
-        <span class="pill">Rush vinti B: <strong id="navWinsB">0</strong></span>
-      </div>
+    <div class="nav-counters">
+      <span class="pill">Match: <strong id="navMatch">–</strong></span>
+      <span class="pill">Serie: <strong id="navBestOf">BO3</strong> • Rush <strong id="navRushIndex">1</strong></span>
+      <span class="pill"><span id="navAName">Re A</span> Rush: <strong id="navSeriesA">0</strong> • <span id="navBName">Re B</span> Rush: <strong id="navSeriesB">0</strong></span>
+      <span class="pill">Giuramenti — <span id="navAName2">A</span>: <strong id="navAllegA">0</strong> • <span id="navBName2">B</span>: <strong id="navAllegB">0</strong></span>
+      <span class="pill" id="navWinner" style="display:none"></span>
+      <span class="pill"><span id="teamName"></span></span>
+      <button id="btnSettings" class="btn btn-ghost">⚙️ Impostazioni</button>
     </div>
-  </nav>
+  </header>
   <main class="container">
     <div id="seriesHud" class="series-hud card glass">
       <span class="pill">Serie: <strong id="hudBestOf">BO3</strong></span>
@@ -66,6 +59,7 @@
   </main>
   <footer class="footer">Solo "Spingi" • Anti‑autoclicker 50ms (client)</footer>
   <script src="state.js?v=1"></script>
+  <script src="hud.js?v=1"></script>
   <script src="ariete.js?v=2"></script>
 </body>
 </html>

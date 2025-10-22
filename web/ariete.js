@@ -16,6 +16,12 @@ const hud = {
   rushBName: document.getElementById('hudRushBName'),
 };
 
+function getParams(){
+  const p = new URLSearchParams(location.search);
+  return { match: p.get('match') || null };
+}
+const params = getParams();
+if (params.match && window.GameState) GameState.setCurrentMatch(params.match);
 const teamName = sessionStorage.getItem('teamName');
 if (nameEl && teamName) nameEl.textContent = `Re: ${teamName}`;
 
@@ -39,34 +45,6 @@ function renderHud(){
 }
 renderHud();
 
-// Series fixed navbar polling (API)
-const params = new URLSearchParams(location.search);
-const matchId = params.get('match');
-async function refreshNav() {
-  if (!matchId) return;
-  try {
-    const res = await fetch(`/api/state?match=${encodeURIComponent(matchId)}`);
-    if (!res.ok) return;
-    const data = await res.json();
-    const elBest = document.getElementById('navBestOf');
-    const elRush = document.getElementById('navRushIndex');
-    const elAlA = document.getElementById('navAlA');
-    const elAlB = document.getElementById('navAlB');
-    const elWA = document.getElementById('navWinsA');
-    const elWB = document.getElementById('navWinsB');
-    const elId = document.getElementById('navMatchId');
-    if (elId) { elId.textContent = matchId.slice(0,8); }
-    if (elBest) elBest.textContent = `BO${data.config.bestOf}`;
-    if (elRush) elRush.textContent = String(data.rushIndex);
-    if (elAlA) elAlA.textContent = String(data.allegiance.A || 0);
-    if (elAlB) elAlB.textContent = String(data.allegiance.B || 0);
-    if (elWA) elWA.textContent = String(data.rushWins.A || 0);
-    if (elWB) elWB.textContent = String(data.rushWins.B || 0);
-  } catch {}
-}
-refreshNav();
-setInterval(refreshNav, 2000);
-
 let pos = 50; // 0 = difesa, 100 = attacco
 let lastClick = 0; // anti-autoclicker 50ms
 
@@ -81,3 +59,5 @@ btnAction.addEventListener('click', () => {
   lastClick = now;
   setPos(pos + 0.6); // spinta fissa per click
 });
+
+if (window.Hud) Hud.render();

@@ -1,26 +1,36 @@
-function $(id){ return document.getElementById(id); }
-async function post(path, body){
-  const res = await fetch(path, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body||{}) });
-  if (!res.ok) throw new Error('HTTP '+res.status);
-  return res.json();
-}
+(function(){
+  function randId(){ return Math.random().toString(36).slice(2, 8) + '-' + Date.now().toString(36).slice(-4); }
+  function val(name){ const el = document.getElementById(name); return el ? el.value.trim() : ''; }
+  function getBestOf(){ const els = document.querySelectorAll('input[name="bestof"]'); for (const e of els){ if (e.checked) return parseInt(e.value,10); } return 3; }
 
-$('btnCreate').addEventListener('click', async () => {
-  const bestOf = parseInt($('bestOf').value,10);
-  const mg = Math.max(1, Math.min(9, parseInt($('mgPerRush').value,10)||3));
-  const nameA = $('nameA').value.trim() || 'Streamer A';
-  const nameB = $('nameB').value.trim() || 'Streamer B';
-  try {
-    const data = await post('/api/createMatch', { bestOf, minigamesPerRush: mg, streamers:{A:{name:nameA}, B:{name:nameB}} });
-    const url = new URL(window.location.href);
-    const join = `${url.origin}${url.pathname.replace('create.html','')}choose.html?match=${encodeURIComponent(data.matchId)}`;
-    const input = $('joinLink');
-    input.value = join;
-    $('result').style.display = 'block';
-    input.select();
-    input.setSelectionRange(0, 99999);
-    try { document.execCommand('copy'); } catch(e){}
-  } catch (e) {
-    alert('Errore nella creazione match. Assicurati che il server sia avviato.');
-  }
-});
+  const btnGen = document.getElementById('btnGen');
+  const btnCopy = document.getElementById('btnCopy');
+  const aJoin = document.getElementById('joinLink');
+  const out = document.getElementById('out');
+
+  btnGen?.addEventListener('click', () => {
+    const id = randId();
+    const bo = getBestOf();
+    const mg = Math.max(1, Math.min(9, parseInt(val('mgpr')||'3',10)));
+    const nameA = encodeURIComponent(val('nameA')||'Streamer A');
+    const nameB = encodeURIComponent(val('nameB')||'Streamer B');
+
+    // Initialize local match so HUDs can load config even on host
+    if (window.GameState){
+      GameState.initMatch(id, { bestOf: bo, minigamesPerRush: mg, streamers: { A: { name: decodeURIComponent(nameA) }, B: { name: decodeURIComponent(nameB) } } });
+    }
+
+    const base = location.origin + location.pathname.replace(/create\.html$/, '');
+    const join = `${base}choose.html?match=${encodeURIComponent(id)}&bo=${bo}&mg=${mg}&nameA=${nameA}&nameB=${nameB}`;
+
+    aJoin.href = join; aJoin.style.display = 'inline-block';
+    btnCopy.disabled = false;
+    out.textContent = `Condividi questo link per far entrare i giocatori nel rush: ${join}`;
+  });
+
+  btnCopy?.addEventListener('click', async () => {
+    if (!aJoin?.href) return;
+    try{ await navigator.clipboard.writeText(aJoin.href); btnCopy.textContent = 'Copiato!'; setTimeout(()=>btnCopy.textContent='Copia link', 1200); }
+    catch(e){ btnCopy.textContent = 'Copia fallita'; setTimeout(()=>btnCopy.textContent='Copia link', 1200); }
+  });
+})();

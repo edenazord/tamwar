@@ -14,22 +14,14 @@
       <span class="crown">👑</span>
       <span>Re & Esercito</span>
     </div>
-  </header>
-  <nav id="seriesNav" class="series-navbar">
-    <div class="wrap">
-      <div class="left">
-        <span class="pill">Match: <strong id="navMatchId">—</strong></span>
-        <span class="pill">Best‑of Rush: <strong id="navBestOf">BO3</strong></span>
-        <span class="pill">Rush <strong id="navRushIndex">1</strong></span>
-      </div>
-      <div class="right">
-        <span class="pill">Giuramenti A: <strong id="navAlA">0</strong></span>
-        <span class="pill">Giuramenti B: <strong id="navAlB">0</strong></span>
-        <span class="pill">Rush vinti A: <strong id="navWinsA">0</strong></span>
-        <span class="pill">Rush vinti B: <strong id="navWinsB">0</strong></span>
-      </div>
+    <div class="nav-counters">
+      <span class="pill">Match: <strong id="navMatch">–</strong></span>
+      <span class="pill">Serie: <strong id="navBestOf">BO3</strong> • Rush <strong id="navRushIndex">1</strong></span>
+      <span class="pill"><span id="navAName">Re A</span> Rush: <strong id="navSeriesA">0</strong> • <span id="navBName">Re B</span> Rush: <strong id="navSeriesB">0</strong></span>
+      <span class="pill">Giuramenti — <span id="navAName2">A</span>: <strong id="navAllegA">0</strong> • <span id="navBName2">B</span>: <strong id="navAllegB">0</strong></span>
+      <span class="pill" id="navWinner" style="display:none"></span>
     </div>
-  </nav>
+  </header>
   <main class="container">
     <h1 class="title neon text-center">Scegli il tuo loRe</h1>
   <div class="grid two pop-in" style="max-width:980px;margin:0 auto;width:100%">
@@ -49,6 +41,7 @@
   </main>
   <footer class="footer full-overlay">Scegli con saggezza. Cambi solo tra i match.</footer>
   <script src="state.js?v=1"></script>
+  <script src="hud.js?v=1"></script>
   <script src="choose.js?v=2"></script>
 </body>
 </html>

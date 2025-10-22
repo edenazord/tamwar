@@ -3,47 +3,43 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Crea Partita — Re & Esercito</title>
+  <title>Crea Partita</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=2" />
 </head>
-<body class="bg-dark gradient">
+<body class="bg-dark gradient body-full">
   <header class="app-bar">
     <div class="logo"><span class="crown">👑</span><span>Crea Partita</span></div>
   </header>
   <main class="container">
-    <div class="card glass" style="max-width:720px;margin:12px auto;">
-      <h2 class="neon" style="margin:0 0 12px;">Impostazioni Serie</h2>
-      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
-        <div>
-          <label>Best‑of (Rush)</label>
-          <select id="bestOf" class="btn-ghost" style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
-            <option value="3">BO3</option>
-            <option value="5">BO5</option>
-          </select>
-        </div>
-        <div>
-          <label>Minigiochi per Rush</label>
-          <input id="mgPerRush" type="number" min="1" max="9" value="3" style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;" />
-        </div>
-        <div>
-          <label>Re A (nome)</label>
-          <input id="nameA" type="text" placeholder="Streamer A" style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;" />
-        </div>
-        <div>
-          <label>Re B (nome)</label>
-          <input id="nameB" type="text" placeholder="Streamer B" style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;" />
-        </div>
+    <div class="card glass" style="max-width:720px;margin:0 auto">
+      <h2>Impostazioni Serie</h2>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
+        <label for="nameA">Nome Re A</label>
+        <input id="nameA" type="text" placeholder="Streamer A" style="flex:1 1 200px; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
       </div>
-      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
-        <button id="btnCreate" class="btn btn-accent">Crea match</button>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
+        <label for="nameB">Nome Re B</label>
+        <input id="nameB" type="text" placeholder="Streamer B" style="flex:1 1 200px; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
       </div>
-      <div id="result" style="margin-top:14px; display:none;">
-        <div class="meta">Link da condividere (join):</div>
-        <input id="joinLink" type="text" readonly style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;" />
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
+        <label>Best Of:</label>
+        <label><input type="radio" name="bestof" value="3" checked> BO3</label>
+        <label><input type="radio" name="bestof" value="5"> BO5</label>
       </div>
+      <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
+        <label for="mgpr">Minigiochi per Rush</label>
+        <input id="mgpr" type="number" min="1" max="9" value="3" style="width:80px; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnGen" class="btn btn-accent">Genera link</button>
+        <button id="btnCopy" class="btn btn-ghost" disabled>Copia link</button>
+        <a id="joinLink" href="#" class="btn btn-primary" target="_blank" rel="noopener" style="display:none">Apri link</a>
+      </div>
+      <p id="out" class="subtitle" style="margin-top:10px"></p>
     </div>
   </main>
+  <script src="state.js?v=1"></script>
   <script src="create.js?v=1"></script>
 </body>
 </html>
