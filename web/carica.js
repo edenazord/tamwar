@@ -6,6 +6,7 @@ const canvas = document.getElementById('curve');
 const ctx = canvas.getContext('2d');
 
 teamName.textContent = `Re ${team}`;
+if (window.Hud) Hud.start(1000);
 let wave = 1;
 let pressed = false;
 let windowStart = 0;

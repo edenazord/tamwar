@@ -96,6 +96,15 @@ html, body { margin:0; padding:0; height:100%; font-family: Inter, system-ui, -a
 .hover-raise:hover { transform: translateY(-4px); box-shadow: 0 18px 40px #000a; }
 .choose-page .hover-raise:hover { transform: none; box-shadow: 0 10px 30px #0008; }
 
+/* Top-center game HUD */
+.game-hud { position: fixed; top: 8px; left: 50%; transform: translateX(-50%); z-index: 40; display:flex; align-items:center; gap: 12px; padding: 6px 10px; background: #0b1020cc; border:1px solid #223; border-radius: 999px; box-shadow: 0 10px 30px #0008; }
+.game-hud .side { display:flex; align-items:center; gap: 8px; }
+.game-hud .avatar.tiny { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border:1px solid #1f2937; }
+.game-hud .nm { font-weight: 700; color:#cbd5e1; }
+.game-hud .score { display:flex; flex-direction:column; align-items:center; min-width: 150px; }
+.game-hud .score .line { font-weight: 800; letter-spacing: 1px; }
+.game-hud .score .sub { font-size: 12px; color:#9ca3af; }
+
 /* Responsive */
 @media (max-width: 780px) {
   .grid.two { grid-template-columns: 1fr; }
