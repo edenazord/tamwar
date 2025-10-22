@@ -13,6 +13,8 @@ function pickTwo(arr) {
 function basename(p){ return p.replace(/\.[^.]+$/, ''); }
 
 const [imgA, imgB] = pickTwo(STREAMERS);
+const params = new URLSearchParams(location.search);
+const matchId = params.get('match');
 const cardA = document.querySelector('.card[data-team="A"]');
 const cardB = document.querySelector('.card[data-team="B"]');
 
@@ -47,6 +49,29 @@ function setImageRobust(imgEl, filename) {
   tryNext();
 }
 
+async function refreshNav() {
+  if (!matchId) return;
+  try {
+    const res = await fetch(`/api/state?match=${encodeURIComponent(matchId)}`);
+    if (!res.ok) return;
+    const data = await res.json();
+  const elBest = document.getElementById('navBestOf');
+  const elRush = document.getElementById('navRushIndex');
+  const elAlA = document.getElementById('navAlA');
+  const elAlB = document.getElementById('navAlB');
+  const elWA = document.getElementById('navWinsA');
+  const elWB = document.getElementById('navWinsB');
+  const elId = document.getElementById('navMatchId');
+  if (elId) { elId.textContent = matchId.slice(0,8); }
+  if (elBest) elBest.textContent = `BO${data.config.bestOf}`;
+  if (elRush) elRush.textContent = String(data.rushIndex);
+  if (elAlA) elAlA.textContent = String(data.allegiance.A || 0);
+  if (elAlB) elAlB.textContent = String(data.allegiance.B || 0);
+  if (elWA) elWA.textContent = String(data.rushWins.A || 0);
+  if (elWB) elWB.textContent = String(data.rushWins.B || 0);
+  } catch {}
+}
+
 if (cardA && cardB) {
   const aImg = cardA.querySelector('img.avatar');
   const bImg = cardB.querySelector('img.avatar');
@@ -56,17 +81,42 @@ if (cardA && cardB) {
   setImageRobust(bImg, imgB);
   aH2.textContent = decodeURIComponent(basename(imgA));
   bH2.textContent = decodeURIComponent(basename(imgB));
+  // Persist streamer meta for HUDs
+  if (window.GameState) {
+    GameState.setStreamers({
+      A: { name: aH2.textContent, img: aImg.getAttribute('src') || '' },
+      B: { name: bH2.textContent, img: bImg.getAttribute('src') || '' },
+    });
+    // Render counters
+    // Counters will be API driven if matchId is present
+    if (!matchId) {
+      const counts = GameState.getAllegiance();
+      const aCountEl = cardA.querySelector('[data-count="A"]');
+      const bCountEl = cardB.querySelector('[data-count="B"]');
+      if (aCountEl) aCountEl.textContent = counts.A ?? 0;
+      if (bCountEl) bCountEl.textContent = counts.B ?? 0;
+    } else {
+      refreshNav();
+      setInterval(refreshNav, 2000);
+    }
+  }
 }
 
 const cards = document.querySelectorAll('.card[data-team]');
 for (const c of cards) {
-  c.addEventListener('click', () => {
+  c.addEventListener('click', async () => {
     const team = c.getAttribute('data-team');
     const name = c.querySelector('h2')?.textContent || team;
     const img = c.querySelector('img.avatar')?.getAttribute('src');
+    if (matchId && (team==='A' || team==='B')) {
+      try { await fetch(`/api/allegiance?match=${encodeURIComponent(matchId)}`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ team })}); } catch {}
+    } else if (window.GameState && (team==='A' || team==='B')) {
+      GameState.incrementAllegiance(team);
+    }
     sessionStorage.setItem('team', team);
     sessionStorage.setItem('teamName', name);
     sessionStorage.setItem('teamImg', img || '');
-    window.location.href = 'ariete.html';
+    const to = matchId ? `ariete.html?match=${encodeURIComponent(matchId)}` : 'ariete.html';
+    window.location.href = to;
   });
 }

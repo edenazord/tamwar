@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crea Partita — Re & Esercito</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=2" />
+</head>
+<body class="bg-dark gradient">
+  <header class="app-bar">
+    <div class="logo"><span class="crown">👑</span><span>Crea Partita</span></div>
+  </header>
+  <main class="container">
+    <div class="card glass" style="max-width:720px;margin:12px auto;">
+      <h2 class="neon" style="margin:0 0 12px;">Impostazioni Serie</h2>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+        <div>
+          <label>Best‑of (Rush)</label>
+          <select id="bestOf" class="btn-ghost" style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;">
+            <option value="3">BO3</option>
+            <option value="5">BO5</option>
+          </select>
+        </div>
+        <div>
+          <label>Minigiochi per Rush</label>
+          <input id="mgPerRush" type="number" min="1" max="9" value="3" style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;" />
+        </div>
+        <div>
+          <label>Re A (nome)</label>
+          <input id="nameA" type="text" placeholder="Streamer A" style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;" />
+        </div>
+        <div>
+          <label>Re B (nome)</label>
+          <input id="nameB" type="text" placeholder="Streamer B" style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;" />
+        </div>
+      </div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+        <button id="btnCreate" class="btn btn-accent">Crea match</button>
+      </div>
+      <div id="result" style="margin-top:14px; display:none;">
+        <div class="meta">Link da condividere (join):</div>
+        <input id="joinLink" type="text" readonly style="width:100%; padding:10px; border-radius:10px; border:1px solid #223; background:#0b1020; color:#e5e7eb;" />
+      </div>
+    </div>
+  </main>
+  <script src="create.js?v=1"></script>
+</body>
+</html>

@@ -17,3 +17,4 @@ Struttura
 Note
 - Login Twitch è mock (solo demo). In produzione sostituire con OAuth.
 - Le pagine `ariete.html` e `carica.html` usano simulazione locale. Integrazione realtime via WebSocket da aggiungere.
+ 

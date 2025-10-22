@@ -43,17 +43,96 @@ function safePath(p) {
   return filePath;
 }
 
-const server = http.createServer((req, res) => {
-  const parsed = url.parse(req.url);
-  let pathname = parsed.pathname || '/';
+// In-memory match state
+const matches = Object.create(null);
+const json = (res, code, obj) => send(res, code, JSON.stringify(obj||{}), { 'Content-Type':'application/json; charset=utf-8' });
+const readJson = (req) => new Promise((resolve) => {
+  let body='';
+  req.on('data', (c)=> body += c);
+  req.on('end', ()=>{ try{ resolve(JSON.parse(body||'{}')); } catch(e){ resolve({}); } });
+});
+function id8(){ return Math.random().toString(16).slice(2,10) + Math.random().toString(16).slice(2,10); }
 
-  // Map root to index.html inside root
+const server = http.createServer(async (req, res) => {
+  const parsed = url.parse(req.url, true);
+  const pathname = parsed.pathname || '/';
+
+  // API routes
+  if (pathname.startsWith('/api/')) {
+    if (pathname === '/api/createMatch' && req.method === 'POST') {
+      const body = await readJson(req);
+      const matchId = id8();
+      matches[matchId] = {
+        createdAt: Date.now(),
+        config: {
+          bestOf: body?.bestOf === 5 ? 5 : 3,
+          minigamesPerRush: Math.max(1, Math.min(9, parseInt(body?.minigamesPerRush||3,10)))
+        },
+        streamers: {
+          A: { name: body?.streamers?.A?.name || 'Streamer A', img: body?.streamers?.A?.img || '' },
+          B: { name: body?.streamers?.B?.name || 'Streamer B', img: body?.streamers?.B?.img || '' }
+        },
+        rushIndex: 1,
+        rushWins: { A: 0, B: 0 },
+        allegiance: { A: 0, B: 0 },
+        minigameIndex: 1,
+        minigameWins: { A: 0, B: 0 },
+      };
+      return json(res, 200, { ok:true, matchId });
+    }
+    if (pathname === '/api/state' && req.method === 'GET') {
+      const id = parsed.query.match;
+      const m = id && matches[id];
+      if (!m) return json(res, 404, { ok:false, error:'match-not-found' });
+      const need = Math.ceil(m.config.bestOf/2);
+      return json(res, 200, { ok:true, matchId:id, config: m.config, streamers:m.streamers, rushIndex:m.rushIndex, rushWins:m.rushWins, allegiance:m.allegiance, minigameIndex:m.minigameIndex, minigameWins:m.minigameWins, need });
+    }
+    if (pathname === '/api/allegiance' && req.method === 'POST') {
+      const id = parsed.query.match;
+      const m = id && matches[id];
+      if (!m) return json(res, 404, { ok:false, error:'match-not-found' });
+      const body = await readJson(req);
+      const team = body?.team === 'B' ? 'B' : 'A';
+      m.allegiance[team] = (m.allegiance[team]||0) + 1;
+      return json(res, 200, { ok:true, allegiance: m.allegiance });
+    }
+    if (pathname === '/api/reportMinigame' && req.method === 'POST') {
+      const id = parsed.query.match;
+      const m = id && matches[id];
+      if (!m) return json(res, 404, { ok:false, error:'match-not-found' });
+      const body = await readJson(req);
+      const team = body?.winner === 'B' ? 'B' : 'A';
+      m.minigameWins[team] = (m.minigameWins[team]||0) + 1;
+      m.minigameIndex += 1;
+      return json(res, 200, { ok:true, minigameWins:m.minigameWins, minigameIndex:m.minigameIndex });
+    }
+    if (pathname === '/api/finalizeRush' && req.method === 'POST') {
+      const id = parsed.query.match;
+      const m = id && matches[id];
+      if (!m) return json(res, 404, { ok:false, error:'match-not-found' });
+      const a = m.minigameWins.A|0, b = m.minigameWins.B|0;
+      if (a!==b) {
+        if (a>b) m.rushWins.A++; else m.rushWins.B++;
+      }
+      m.rushIndex += 1;
+      m.minigameIndex = 1;
+      m.minigameWins = {A:0,B:0};
+      // reset allegiance for new rush
+      m.allegiance = {A:0,B:0};
+      const need = Math.ceil(m.config.bestOf/2);
+      let winner = null;
+      if (m.rushWins.A >= need) winner = 'A';
+      if (m.rushWins.B >= need) winner = 'B';
+      return json(res, 200, { ok:true, rushWins:m.rushWins, rushIndex:m.rushIndex, winner });
+    }
+    return json(res, 404, { ok:false, error:'not-found' });
+  }
+
+  // Static files
   let filePath = safePath(pathname === '/' ? '/index.html' : pathname);
   if (!filePath) return send(res, 403, 'Forbidden');
-
   fs.stat(filePath, (err, stat) => {
     if (!err && stat.isDirectory()) {
-      // try directory index
       filePath = path.join(filePath, 'index.html');
     }
     fs.readFile(filePath, (err2, data) => {
@@ -63,7 +142,6 @@ const server = http.createServer((req, res) => {
       const ext = path.extname(filePath).toLowerCase();
       const type = MIME[ext] || 'application/octet-stream';
       const headers = { 'Content-Type': type };
-      // Allow caching for non-HTML assets for faster dev reloads
       if (ext && ext !== '.html') {
         headers['Cache-Control'] = 'public, max-age=0';
       }

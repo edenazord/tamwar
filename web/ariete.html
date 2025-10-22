@@ -10,9 +10,30 @@
 <body class="bg-dark gradient">
   <header class="app-bar">
     <div class="logo"><span class="crown">🛡️</span><span>Assedio all'Ariete</span></div>
-    <div class="status"><span id="teamName" class="chip"></span></div>
+    <div class="status"><span id="teamName" class="chip"></span> <button id="btnSettings" class="btn btn-ghost">⚙️ Impostazioni</button></div>
   </header>
+  <nav id="seriesNav" class="series-navbar">
+    <div class="wrap">
+      <div class="left">
+        <span class="pill">Match: <strong id="navMatchId">—</strong></span>
+        <span class="pill">Best‑of Rush: <strong id="navBestOf">BO3</strong></span>
+        <span class="pill">Rush <strong id="navRushIndex">1</strong></span>
+      </div>
+      <div class="right">
+        <span class="pill">Giuramenti A: <strong id="navAlA">0</strong></span>
+        <span class="pill">Giuramenti B: <strong id="navAlB">0</strong></span>
+        <span class="pill">Rush vinti A: <strong id="navWinsA">0</strong></span>
+        <span class="pill">Rush vinti B: <strong id="navWinsB">0</strong></span>
+      </div>
+    </div>
+  </nav>
   <main class="container">
+    <div id="seriesHud" class="series-hud card glass">
+      <span class="pill">Serie: <strong id="hudBestOf">BO3</strong></span>
+      <span class="pill">Rush: <strong id="hudRushIndex">1</strong></span>
+      <span class="pill">Rush vinti — <span id="hudAName">Re A</span>: <strong id="hudSeriesA">0</strong> • <span id="hudBName">Re B</span>: <strong id="hudSeriesB">0</strong></span>
+      <span class="pill">Minigiochi (rush) — <span id="hudRushAName">Re A</span>: <strong id="hudRushA">0</strong> • <span id="hudRushBName">Re B</span>: <strong id="hudRushB">0</strong> di <strong id="hudMgPerRush">3</strong></span>
+    </div>
     <div class="arena card glass pop-in">
       <div class="bar-wrap">
         <div class="bar-bg"></div>
@@ -22,8 +43,29 @@
         <button id="btnAction" class="btn btn-primary big pulse">Spingi</button>
       </div>
     </div>
+    <!-- Modal impostazioni serie/rush -->
+    <div id="settingsModal" class="modal hidden">
+      <div class="modal-backdrop"></div>
+      <div class="modal-card card glass">
+        <h3>Impostazioni Serie</h3>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
+          <label>Best Of:</label>
+          <label><input type="radio" name="bestof" value="3" checked> BO3</label>
+          <label><input type="radio" name="bestof" value="5"> BO5</label>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:8px 0 10px;">
+          <label for="mgpr">Minigiochi per Rush:</label>
+          <input id="mgpr" type="number" min="1" max="9" value="3" style="width:80px;">
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+          <button id="btnCloseSettings" class="btn btn-ghost">Annulla</button>
+          <button id="btnSaveSettings" class="btn btn-accent">Salva</button>
+        </div>
+      </div>
+    </div>
   </main>
   <footer class="footer">Solo "Spingi" • Anti‑autoclicker 50ms (client)</footer>
+  <script src="state.js?v=1"></script>
   <script src="ariete.js?v=2"></script>
 </body>
 </html>
