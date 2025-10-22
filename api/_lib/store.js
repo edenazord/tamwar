@@ -13,7 +13,7 @@ export async function getMatch(id) {
 }
 
 export async function setMatch(id, data) {
-  if (!isKVReady()) throw new Error('KV_NOT_CONFIGURED');
+  if (!isKVReady()) throw new Error('KV_NOT_CONFIGURED' );
   await kv.set(PREFIX + id, data);
   return data;
 }
