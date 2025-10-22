@@ -28,7 +28,7 @@ const [imgA, imgB] = pickTwo(STREAMERS);
 const cardA = document.querySelector('.card[data-team="A"]');
 const cardB = document.querySelector('.card[data-team="B"]');
 
-function setImageRobust(imgEl, filename) {
+function setImageRobust(imgEl, filename, onReady) {
   const BASES = [
     // Nuova posizione: assets/img
     '../assets/img/streamer/', '../assets/img/',
@@ -45,6 +45,7 @@ function setImageRobust(imgEl, filename) {
   const onload = () => {
     requestAnimationFrame(() => { imgEl.classList.add('fade-in'); imgEl.style.opacity = '1'; });
     imgEl.removeEventListener('load', onload);
+    if (typeof onReady === 'function') onReady(imgEl.src);
   };
   imgEl.addEventListener('load', onload);
   const tryNext = () => {
@@ -64,8 +65,8 @@ if (cardA && cardB) {
   const bImg = cardB.querySelector('img.avatar');
   const aH2 = cardA.querySelector('h2');
   const bH2 = cardB.querySelector('h2');
-  setImageRobust(aImg, imgA);
-  setImageRobust(bImg, imgB);
+  setImageRobust(aImg, imgA, (src)=>{ if (window.GameState) GameState.setStreamers({ A: { img: src } }); if (window.Hud) Hud.render(); });
+  setImageRobust(bImg, imgB, (src)=>{ if (window.GameState) GameState.setStreamers({ B: { img: src } }); if (window.Hud) Hud.render(); });
   aH2.textContent = params.nameA || decodeURIComponent(basename(imgA));
   bH2.textContent = params.nameB || decodeURIComponent(basename(imgB));
   // Persist streamer meta for HUDs
@@ -78,8 +79,8 @@ if (cardA && cardB) {
       });
     }
     GameState.setStreamers({
-      A: { name: aH2.textContent, img: aImg.getAttribute('src') || '' },
-      B: { name: bH2.textContent, img: bImg.getAttribute('src') || '' },
+      A: { name: aH2.textContent },
+      B: { name: bH2.textContent },
     });
     // Render counters
     const counts = GameState.getAllegiance();
