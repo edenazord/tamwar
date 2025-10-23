@@ -1,5 +1,5 @@
-import { sendJson, getPathParts } from '../../_lib/util.js';
-import { getMatch, isKVReady } from '../../_lib/store.js';
+import { sendJson, getPathParts } from '../_lib/util.js';
+import { getMatch, isKVReady } from '../_lib/store.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return sendJson(res, 405, { error: 'method not allowed' });
