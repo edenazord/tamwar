@@ -77,6 +77,11 @@ html, body { margin:0; padding:0; height:100%; font-family: Inter, system-ui, -a
 
 /* Arena specific */
 .arena { position: relative; overflow: hidden; }
+.arena.siege { display: grid; grid-template-columns: 1fr minmax(320px, 2fr) 1fr; align-items: center; gap: 20px; }
+.arena.siege .side { display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 8px; min-height: 160px; }
+.arena.siege .side .castle { font-size: 80px; filter: drop-shadow(0 6px 22px #0008); }
+.arena.siege .side .nm { font-weight: 800; letter-spacing: .5px; text-shadow: 0 2px 0 #0009; }
+.arena.siege .center { display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .bar-wrap { position: relative; height: 28px; border-radius: 999px; border:1px solid #1f2937; background: #0b0f17; overflow:hidden; margin: 24px 0; }
 .bar-bg { position:absolute; inset:0; background: repeating-linear-gradient(90deg, #0f172a, #0f172a 10px, #111827 10px, #111827 20px); opacity:.7; }
 .bar-fill { position:absolute; inset:0 0 0 0; width: 50%; background: linear-gradient(90deg, #ef4444, #22d3ee); box-shadow: inset 0 0 18px #22d3ee66; transition: width .25s ease; }
@@ -113,6 +118,13 @@ html, body { margin:0; padding:0; height:100%; font-family: Inter, system-ui, -a
   .card img.avatar { height: 160px; }
   .choose-page .grid.two { grid-template-columns: 250px; justify-content: center; }
   .choose-page .card img.avatar { height: 200px; }
+  /* Siege arena responsive tweaks */
+  .arena.siege { grid-template-columns: 1fr; gap: 12px; }
+  .arena.siege .side { flex-direction: row; gap: 10px; min-height: auto; justify-content: space-between; }
+  .arena.siege .side.left { order: 1; }
+  .arena.siege .center { order: 2; }
+  .arena.siege .side.right { order: 3; }
+  .arena.siege .side .castle { font-size: 48px; }
 }
 
 /* Choose page: enforce fixed card heights to avoid layout jump */
