@@ -9,7 +9,7 @@
   async function loadInfo(){
     try{
       // Check invite availability first
-      const chk = await fetch(`/api/matches/${params.match}/invite-check?token=${encodeURIComponent(params.token)}`);
+  const chk = await fetch(`/api/matches/invite-check?id=${encodeURIComponent(params.match)}&token=${encodeURIComponent(params.token)}`);
       if (!chk.ok){
         desc.textContent = 'Invito non valido o già usato.';
         btnLoginB.disabled = true; btnAccept.disabled = true;
