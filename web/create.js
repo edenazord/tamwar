@@ -153,7 +153,7 @@
     const poll = setInterval(async () => {
       try{
         console.log(`Polling match status for ID: ${id}`);
-        const res = await fetch(`/api/matches/${id}`);
+  const res = await fetch(`/api/matches/get?id=${encodeURIComponent(id)}`);
         if (!res.ok) {
           console.log(`API call failed with status: ${res.status} ${res.statusText}`);
           if (res.status === 404) {
@@ -228,7 +228,7 @@
       // Se A arriva con ?match=, prova a riprendere quella partita se è sua
       if (params.match){
         try{
-          const r = await fetch(`/api/matches/${params.match}`);
+          const r = await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`);
           if (r.ok){
             const s = await r.json();
             if (s?.ownerA?.id && u?.id && s.ownerA.id === u.id){
@@ -267,7 +267,7 @@
       createOrResumeMatch();
     } else if (role === 'B' && params.match){
       try{
-        const r = await fetch(`/api/matches/${params.match}`);
+  const r = await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`);
         if (!r.ok) return;
         const s = await r.json();
         if (s && s.status === 'accepted'){

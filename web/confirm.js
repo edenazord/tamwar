@@ -15,7 +15,7 @@
         btnLoginB.disabled = true; btnAccept.disabled = true;
         return;
       }
-      const s = await (await fetch(`/api/matches/${params.match}`)).json();
+  const s = await (await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`)).json();
       if (s.error){ desc.textContent = 'Invito non valido'; return; }
       desc.textContent = `Partita #${s.id} • BO${s.config?.bestOf||3} • ${s.config?.minigamesPerRush||3} minigiochi • Re: ${s.config?.names?.A} vs ${s.config?.names?.B}`;
     } catch(e){ desc.textContent = 'Errore nel recupero dettagli.'; }

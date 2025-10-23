@@ -45,7 +45,7 @@
       const u = window.Auth?.currentUser();
       if (!params.match || !u || u.role !== 'A') return;
       try{
-        const s = await (await fetch(`/api/matches/${params.match}`)).json();
+  const s = await (await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`)).json();
         if (s && s.status === 'accepted' && s.ownerA && s.ownerA.id === u.id){
           const btn = document.createElement('button');
           btn.textContent = 'Inizia Partita';

@@ -14,7 +14,7 @@ let isHost = params.match ? (sessionStorage.getItem('tamwar_host_'+params.match)
   try{
     const u = window.Auth?.currentUser();
     if (!u || !params.match) return;
-    const s = await (await fetch(`/api/matches/${params.match}`)).json();
+  const s = await (await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`)).json();
     if (s && s.ownerA && s.ownerA.id === u.id) isHost = true;
   }catch(e){}
 })();
