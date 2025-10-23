@@ -18,7 +18,7 @@ let lastClick = 0; // anti-autoclicker 50ms
 
 function setPos(p) {
   pos = Math.max(0, Math.min(100, p));
-  bar.style.width = `${pos}%`;
+  if (bar) bar.style.width = `${pos}%`;
 }
 
 function updateHint(team){
@@ -40,10 +40,12 @@ function applyTeamNames(){
   }catch(e){}
 }
 applyTeamNames();
+// Imposta larghezza iniziale
+setPos(pos);
 // Hint iniziale
 updateHint(MY_TEAM);
 
-btnPush.addEventListener('click', () => {
+if (btnPush) btnPush.addEventListener('click', () => {
   const now = performance.now();
   if (now - lastClick < 50) return; // blocco 50ms
   lastClick = now;
@@ -102,4 +104,4 @@ function endGame(winner){
 }
 
 // Osserva i cambi di posizione ed esegue check vittoria
-new MutationObserver(checkWin).observe(bar, { attributes: true, attributeFilter: ['style'] });
+if (bar) new MutationObserver(checkWin).observe(bar, { attributes: true, attributeFilter: ['style'] });
