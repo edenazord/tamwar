@@ -29,6 +29,30 @@ const [imgA, imgB] = pickTwo(STREAMERS);
 const cardA = document.querySelector('.card[data-team="A"]');
 const cardB = document.querySelector('.card[data-team="B"]');
 
+async function resolveStreamerNames(){
+  // 1) Se passati via query, usa quelli
+  if (params.nameA || params.nameB){
+    return {
+      a: params.nameA || 'Streamer A',
+      b: params.nameB || 'Streamer B'
+    };
+  }
+  // 2) Se c'è un match, leggi dal server
+  if (params.match){
+    try {
+      const res = await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`);
+      if (res.ok){
+        const s = await res.json();
+        const a = s?.config?.names?.A || s?.ownerA?.name || 'Streamer A';
+        const b = s?.config?.names?.B || s?.invitedB?.name || 'Streamer B';
+        return { a, b };
+      }
+    } catch(e){}
+  }
+  // 3) Fallback
+  return { a: 'Streamer A', b: 'Streamer B' };
+}
+
 function setImageRobust(imgEl, filename, onReady) {
   const BASES = [
     // Nuova posizione: assets/img
@@ -68,37 +92,37 @@ if (cardA && cardB) {
   const bH2 = cardB.querySelector('h2');
   setImageRobust(aImg, imgA, (src)=>{ if (window.GameState) GameState.setStreamers({ A: { img: src } }); if (window.Hud) Hud.render(); });
   setImageRobust(bImg, imgB, (src)=>{ if (window.GameState) GameState.setStreamers({ B: { img: src } }); if (window.Hud) Hud.render(); });
-  aH2.textContent = params.nameA || decodeURIComponent(basename(imgA));
-  bH2.textContent = params.nameB || decodeURIComponent(basename(imgB));
-  // Persist streamer meta for HUDs
-  if (window.GameState) {
-    // Host detection: only the creator (who has the local token) becomes host
-    if (params.match && params.owner) {
-      try {
-        const key = localStorage.getItem('tamwar_owner_'+params.match);
-        if (key && key === params.owner) sessionStorage.setItem('tamwar_host_'+params.match, '1');
-        else sessionStorage.removeItem('tamwar_host_'+params.match);
-      } catch(e){}
+  (async () => {
+    const names = await resolveStreamerNames();
+    aH2.textContent = names.a;
+    bH2.textContent = names.b;
+    // Persist streamer meta for HUDs
+    if (window.GameState) {
+      // Host detection: only the creator (who has the local token) becomes host
+      if (params.match && params.owner) {
+        try {
+          const key = localStorage.getItem('tamwar_owner_'+params.match);
+          if (key && key === params.owner) sessionStorage.setItem('tamwar_host_'+params.match, '1');
+          else sessionStorage.removeItem('tamwar_host_'+params.match);
+        } catch(e){}
+      }
+      // Initialize match when arriving with a match param
+      if (params.match) {
+        GameState.initMatch(params.match, {
+          bestOf: params.bo||undefined,
+          minigamesPerRush: params.mg||undefined,
+        });
+      }
+      GameState.setStreamers({ A: { name: names.a }, B: { name: names.b } });
+      // Render counters
+      const counts = GameState.getAllegiance();
+      const aCountEl = cardA.querySelector('[data-count="A"]');
+      const bCountEl = cardB.querySelector('[data-count="B"]');
+      if (aCountEl) aCountEl.textContent = counts.A ?? 0;
+      if (bCountEl) bCountEl.textContent = counts.B ?? 0;
+      if (window.Hud) Hud.render();
     }
-    // Initialize match when arriving with a match param
-    if (params.match) {
-      GameState.initMatch(params.match, {
-        bestOf: params.bo||undefined,
-        minigamesPerRush: params.mg||undefined,
-      });
-    }
-    GameState.setStreamers({
-      A: { name: aH2.textContent },
-      B: { name: bH2.textContent },
-    });
-    // Render counters
-    const counts = GameState.getAllegiance();
-    const aCountEl = cardA.querySelector('[data-count="A"]');
-    const bCountEl = cardB.querySelector('[data-count="B"]');
-    if (aCountEl) aCountEl.textContent = counts.A ?? 0;
-    if (bCountEl) bCountEl.textContent = counts.B ?? 0;
-    if (window.Hud) Hud.render();
-  }
+  })();
 }
 
 const cards = document.querySelectorAll('.card[data-team]');
