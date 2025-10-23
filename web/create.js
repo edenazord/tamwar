@@ -138,7 +138,7 @@
       } catch(e){ out.textContent = 'Errore creazione match (nessuna risposta dal server)'; return; }
     }
     // build links
-    const base = location.origin + location.pathname.replace(/create\.html$/, '');
+  const base = location.origin + location.pathname.replace(/[^/]*$/, '');
     const invite = `${base}confirm.html?match=${encodeURIComponent(id)}&token=${encodeURIComponent(inviteKey)}`;
     // show only invite for now; spectators link after acceptance
   if (actionLink){ actionLink.href = invite; actionLink.textContent = invite; }
@@ -241,7 +241,7 @@
                 // Prepara link pubblico con owner per A
                 let ownerKey = localStorage.getItem('tamwar_owner_'+CURRENT.id);
                 if (!ownerKey) { ownerKey = Math.random().toString(36).slice(2) + Date.now().toString(36).slice(-4); try{ localStorage.setItem('tamwar_owner_'+CURRENT.id, ownerKey); }catch(e){} }
-                const base = location.origin + location.pathname.replace(/create\.html$/, '');
+                const base = location.origin + location.pathname.replace(/[^/]*$/, '');
                 const nameA2 = encodeURIComponent(s.config?.names?.A || u.display_name || 'Streamer A');
                 const nameB2 = encodeURIComponent(s.config?.names?.B || 'Streamer B');
                 const joinA = `${base}choose.html?match=${encodeURIComponent(CURRENT.id)}&bo=${CURRENT.bo}&mg=${CURRENT.mg}&nameA=${nameA2}&nameB=${nameB2}&owner=${encodeURIComponent(ownerKey)}`;
@@ -271,7 +271,7 @@
         if (!r.ok) return;
         const s = await r.json();
         if (s && s.status === 'accepted'){
-          const base = location.origin + location.pathname.replace(/create\.html$/, '');
+          const base = location.origin + location.pathname.replace(/[^/]*$/, '');
           const nameA2 = encodeURIComponent(s.config?.names?.A || 'Streamer A');
           const nameB2 = encodeURIComponent(s.config?.names?.B || u.display_name || 'Streamer B');
           const joinB = `${base}choose.html?match=${encodeURIComponent(params.match)}&bo=${s.config?.bestOf||3}&mg=${s.config?.minigamesPerRush||3}&nameA=${nameA2}&nameB=${nameB2}`;

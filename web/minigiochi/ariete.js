@@ -51,7 +51,7 @@ if (btnPush) btnPush.addEventListener('click', () => {
   lastClick = now;
   const team = (MY_TEAM === 'A' || MY_TEAM === 'B') ? MY_TEAM : 'A';
   // Trasforma in movimento della barra: A spinge a destra, B a sinistra
-  const step = 0.8; // intensità per click (tunabile)
+  const step = 4; // intensità per click (più visibile)
   setPos(pos + (team === 'A' ? +step : -step));
   // Messaggio contestuale
   updateHint(team);
