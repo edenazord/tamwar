@@ -7,24 +7,6 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><text y=%2224%22 font-size=%2224%22>👑</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=2" />
-  <script>
-    // Router leggero: usa un unico link pubblico (root) e reindirizza alle pagine giuste in base ai parametri
-    (function(){
-      try{
-        var qs = new URLSearchParams(location.search);
-        if (qs.has('token') && qs.get('match')) {
-          // Link privato per Streamer B (accettazione): usa la pagina di conferma
-          location.replace('confirm.html' + location.search);
-          return;
-        }
-        if (qs.has('match')) {
-          // Link pubblico dopo accettazione: vai alla scelta del re
-          location.replace('choose.html' + location.search);
-          return;
-        }
-      }catch(e){}
-    })();
-  </script>
 </head>
 <body class="bg-dark gradient body-full">
   <header class="app-bar">
@@ -72,19 +54,36 @@
           <img id="preImgA" class="avatar" width="640" height="360" alt="Re A" />
           <h2 id="preNameA" class="accent">Streamer A</h2>
           <div class="meta"><span class="badge" id="preCountA">0</span> hanno giurato</div>
-          <button class="btn btn-accent" disabled>Giura Fedeltà</button>
+          
         </div>
         <div class="card" data-team="B">
           <img id="preImgB" class="avatar" width="640" height="360" alt="Re B" />
           <h2 id="preNameB" class="accent">Streamer B</h2>
           <div class="meta"><span class="badge" id="preCountB">0</span> hanno giurato</div>
-          <button class="btn btn-accent" disabled>Giura Fedeltà</button>
+          
         </div>
       </div>
     </section>
   </main>
   <script src="state.js?v=1"></script>
   <script src="auth.js?v=1"></script>
+  <script>
+    // Router unificato: token => confirm, match senza login => choose, con login (A/B) resta qui
+    (function(){
+      try{
+        var qs = new URLSearchParams(location.search);
+        if (qs.has('token') && qs.get('match')){
+          location.replace('confirm.html' + location.search); return;
+        }
+        if (qs.has('match')){
+          var role = window.Auth && typeof window.Auth.currentUser === 'function' ? (window.Auth.currentUser()||{}).role : null;
+          if (!role){
+            location.replace('choose.html' + location.search); return;
+          }
+        }
+      }catch(e){}
+    })();
+  </script>
   <script src="create.js?v=1"></script>
 </body>
 </html>

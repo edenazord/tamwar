@@ -36,7 +36,7 @@
       btnAccept.disabled = true;
       // Invalida subito l'invito a livello UI
       desc.textContent = 'Invito consumato. Puoi chiudere questa pagina.';
-      setTimeout(()=>{ window.location.replace(`index.html?match=${encodeURIComponent(params.match)}`); }, 800);
+  setTimeout(()=>{ window.location.replace(`/?match=${encodeURIComponent(params.match)}`); }, 800);
     } catch(e){ out.textContent = 'Errore di rete'; }
   });
 
