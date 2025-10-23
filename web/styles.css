@@ -110,6 +110,8 @@ html, body { margin:0; padding:0; height:100%; font-family: Inter, system-ui, -a
 .game-hud .score { display:flex; flex-direction:column; align-items:center; min-width: 150px; }
 .game-hud .score .line { font-weight: 800; letter-spacing: 1px; }
 .game-hud .score .sub { font-size: 12px; color:#9ca3af; }
+.game-hud .side .stack { display:flex; flex-direction: column; line-height: 1.1; }
+.game-hud .sub.alleg { font-size: 11px; color:#9ca3af; display:flex; align-items:center; gap:4px; margin-top:2px; }
 
 /* Responsive */
 @media (max-width: 780px) {

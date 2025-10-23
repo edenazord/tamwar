@@ -3,15 +3,20 @@
     <div class="hud-center"><div id="gameHud" class="game-hud">
       <div class="side a">
         <img id="hudImgA" class="avatar tiny" alt="A"/>
-        <span id="hudNameA" class="nm">Re A</span>
+        <div class="stack">
+          <span id="hudNameA" class="nm">Re A</span>
+          <div class="sub alleg"><span class="knight">♞</span> <span id="hudAllegA">0</span></div>
+        </div>
       </div>
       <div class="score">
         <div class="line"><span id="hudScoreA">0</span> — <span id="hudScoreB">0</span></div>
         <div class="sub">Rush <span id="hudRushIndex">1</span> • <span id="hudBestOf">BO3</span></div>
-        <div class="sub">Giuramenti: <span id="hudAllegA">0</span> | <span id="hudAllegB">0</span></div>
       </div>
       <div class="side b">
-        <span id="hudNameB" class="nm">Re B</span>
+        <div class="stack">
+          <span id="hudNameB" class="nm">Re B</span>
+          <div class="sub alleg"><span class="knight">♞</span> <span id="hudAllegB">0</span></div>
+        </div>
         <img id="hudImgB" class="avatar tiny" alt="B"/>
       </div>
     </div></div>`;
