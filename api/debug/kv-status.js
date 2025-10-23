@@ -6,8 +6,17 @@ export default async function handler(req, res) {
   
   const status = {
     kvReady: isKVReady(),
-    hasUrl: !!process.env.KV_REST_API_URL,
-    hasToken: !!process.env.KV_REST_API_TOKEN,
+    vercelKV: {
+      hasUrl: !!process.env.KV_REST_API_URL,
+      hasToken: !!process.env.KV_REST_API_TOKEN
+    },
+    upstash: {
+      hasRestUrl: !!process.env.UPSTASH_REDIS_REST_URL,
+      hasRestToken: !!process.env.UPSTASH_REDIS_REST_TOKEN
+    },
+    redisTcp: {
+      hasUrl: !!process.env.REDIS_URL || !!process.env.UPSTASH_REDIS_URL
+    },
     environment: process.env.NODE_ENV || 'development'
   };
   
