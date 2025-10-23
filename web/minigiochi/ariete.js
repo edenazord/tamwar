@@ -37,8 +37,6 @@ btnPush.addEventListener('click', () => {
   if (now - lastClick < 50) return; // blocco 50ms
   lastClick = now;
   const team = (MY_TEAM === 'A' || MY_TEAM === 'B') ? MY_TEAM : 'A';
-  // Ogni click dell'esercito incrementa la propria pressione
-  if (window.GameState) GameState.incrementAllegiance(team);
   // Trasforma in movimento della barra: A spinge a destra, B a sinistra
   const step = 0.8; // intensità per click (tunabile)
   setPos(pos + (team === 'A' ? +step : -step));
@@ -55,7 +53,6 @@ window.addEventListener('keydown', (e) => {
     const now = performance.now();
     if (now - lastClick < 50) return;
     lastClick = now;
-    if (window.GameState) GameState.incrementAllegiance('B');
     setPos(pos - 0.8);
   }
 });
