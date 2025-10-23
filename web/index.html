@@ -6,6 +6,17 @@
   <title>Re & Esercito — Crea Partita</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><text y=%2224%22 font-size=%2224%22>👑</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <script>
+    // Canonicalizza: /index.html?x -> /?x per evitare discrepanze tra i due URL
+    (function(){
+      try{
+        if (/\/index\.html$/i.test(location.pathname)){
+          var dir = location.pathname.replace(/index\.html$/i, '');
+          location.replace(dir + location.search + location.hash);
+        }
+      }catch(e){}
+    })();
+  </script>
   <link rel="stylesheet" href="styles.css?v=2" />
 </head>
 <body class="bg-dark gradient body-full">
