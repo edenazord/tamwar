@@ -21,6 +21,15 @@ function setPos(p) {
   bar.style.width = `${pos}%`;
 }
 
+function updateHint(team){
+  if (!hint) return;
+  if (team === 'A' || team === 'B') {
+    hint.textContent = `Hai giurato per ${team}. Premi ripetutamente per assediare il castello avversario!`;
+  } else {
+    hint.textContent = `Premi ripetutamente per assediare il castello avversario!`;
+  }
+}
+
 function applyTeamNames(){
   try{
     const s = window.GameState?.getStreamers ? GameState.getStreamers() : null;
@@ -31,6 +40,8 @@ function applyTeamNames(){
   }catch(e){}
 }
 applyTeamNames();
+// Hint iniziale
+updateHint(MY_TEAM);
 
 btnPush.addEventListener('click', () => {
   const now = performance.now();
@@ -41,7 +52,7 @@ btnPush.addEventListener('click', () => {
   const step = 0.8; // intensità per click (tunabile)
   setPos(pos + (team === 'A' ? +step : -step));
   // Messaggio contestuale
-  if (hint) hint.textContent = `Hai giurato per ${team}. Premi ripetutamente per assediare il castello avversario!`;
+  updateHint(team);
 });
 
 // Tasti scorciatoia: A per Re A, L per Re B
@@ -54,6 +65,7 @@ window.addEventListener('keydown', (e) => {
     if (now - lastClick < 50) return;
     lastClick = now;
     setPos(pos - 0.8);
+    updateHint('B');
   }
 });
 
