@@ -139,7 +139,8 @@
     }
     // build links
   const base = location.origin + location.pathname.replace(/[^/]*$/, '');
-    const invite = `${base}confirm.html?match=${encodeURIComponent(id)}&token=${encodeURIComponent(inviteKey)}`;
+  // Link privato: usa root con router (index) che invierà a confirm.html
+  const invite = `${base}?match=${encodeURIComponent(id)}&token=${encodeURIComponent(inviteKey)}`;
     // show only invite for now; spectators link after acceptance
   if (actionLink){ actionLink.href = invite; actionLink.textContent = invite; }
   if (linkLabel) linkLabel.textContent = 'Link privato';
@@ -244,7 +245,8 @@
                 const base = location.origin + location.pathname.replace(/[^/]*$/, '');
                 const nameA2 = encodeURIComponent(s.config?.names?.A || u.display_name || 'Streamer A');
                 const nameB2 = encodeURIComponent(s.config?.names?.B || 'Streamer B');
-                const joinA = `${base}choose.html?match=${encodeURIComponent(CURRENT.id)}&bo=${CURRENT.bo}&mg=${CURRENT.mg}&nameA=${nameA2}&nameB=${nameB2}&owner=${encodeURIComponent(ownerKey)}`;
+                // Link pubblico: usa root con router (index) che invierà a choose.html
+                const joinA = `${base}?match=${encodeURIComponent(CURRENT.id)}&bo=${CURRENT.bo}&mg=${CURRENT.mg}&nameA=${nameA2}&nameB=${nameB2}&owner=${encodeURIComponent(ownerKey)}`;
                 if (actionLink){ actionLink.href = joinA; actionLink.textContent = joinA; }
                 if (linkLabel) linkLabel.textContent = 'Link pubblico';
                 lockSettings(true);
@@ -274,7 +276,7 @@
           const base = location.origin + location.pathname.replace(/[^/]*$/, '');
           const nameA2 = encodeURIComponent(s.config?.names?.A || 'Streamer A');
           const nameB2 = encodeURIComponent(s.config?.names?.B || u.display_name || 'Streamer B');
-          const joinB = `${base}choose.html?match=${encodeURIComponent(params.match)}&bo=${s.config?.bestOf||3}&mg=${s.config?.minigamesPerRush||3}&nameA=${nameA2}&nameB=${nameB2}`;
+          const joinB = `${base}?match=${encodeURIComponent(params.match)}&bo=${s.config?.bestOf||3}&mg=${s.config?.minigamesPerRush||3}&nameA=${nameA2}&nameB=${nameB2}`;
           if (actionLink){ actionLink.href = joinB; actionLink.textContent = joinB; }
           if (linkLabel) linkLabel.textContent = 'Link pubblico';
           if (prePanel) prePanel.style.display = '';

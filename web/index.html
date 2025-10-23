@@ -7,6 +7,24 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22><text y=%2224%22 font-size=%2224%22>👑</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=2" />
+  <script>
+    // Router leggero: usa un unico link pubblico (root) e reindirizza alle pagine giuste in base ai parametri
+    (function(){
+      try{
+        var qs = new URLSearchParams(location.search);
+        if (qs.has('token') && qs.get('match')) {
+          // Link privato per Streamer B (accettazione): usa la pagina di conferma
+          location.replace('confirm.html' + location.search);
+          return;
+        }
+        if (qs.has('match')) {
+          // Link pubblico dopo accettazione: vai alla scelta del re
+          location.replace('choose.html' + location.search);
+          return;
+        }
+      }catch(e){}
+    })();
+  </script>
 </head>
 <body class="bg-dark gradient body-full">
   <header class="app-bar">
