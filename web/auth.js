@@ -5,7 +5,7 @@
 
   function login(role){
     if (!CLIENT_ID){
-      const name = prompt('Demo login: inserisci nome utente');
+      const name = prompt('Demo login: inserisci nome utente'); 
       const id = 'demo_'+Math.random().toString(36).slice(2);
       const user = { id, display_name: name||'Demo', role };
       sessionStorage.setItem('tam_user', JSON.stringify(user));
