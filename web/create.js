@@ -294,7 +294,7 @@
     const u = window.Auth?.currentUser();
     if (!u || u.role !== 'A' || !CURRENT.id) return;
     try{
-      await fetch(`/api/matches/${CURRENT.id}/start`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ actor: u.id }) });
+  await fetch(`/api/matches/start`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: CURRENT.id, actor: u.id }) });
     } catch(e){}
     // Vai al primo minigioco (Ariete) con il match corrente
     window.location.href = `minigiochi/ariete.html?match=${encodeURIComponent(CURRENT.id)}`;

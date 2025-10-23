@@ -30,7 +30,7 @@
     const u = Auth.currentUser();
     if (!u || u.role !== 'B'){ out.textContent = 'Effettua il login come Streamer B'; return; }
     try{
-      const r = await (await fetch(`/api/matches/${params.match}/accept`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token: params.token, b: { id: u.id, name: u.display_name } }) })).json();
+  const r = await (await fetch(`/api/matches/accept`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: params.match, token: params.token, b: { id: u.id, name: u.display_name } }) })).json();
       if (!r || !r.ok) { out.textContent = 'Accettazione fallita'; return; }
       out.textContent = 'Accettato! Reindirizzamento alla schermata iniziale…';
       btnAccept.disabled = true;
