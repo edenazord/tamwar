@@ -104,7 +104,10 @@ html, body { margin:0; padding:0; height:100%; font-family: Inter, system-ui, -a
 
 /* HUD inside navbar */
 .app-bar .hud-center { flex: 1 1 auto; display:flex; justify-content:center; }
+.app-bar { display:flex; align-items:center; gap: 8px; }
+.app-bar .hud-right { margin-left: auto; }
 .game-hud { display:flex; align-items:center; gap: 12px; padding: 6px 10px; background: #0b1020; border:1px solid #223; border-radius: 999px; box-shadow: 0 6px 18px #0006; }
+.btn.tiny { padding: 6px 10px; border-radius: 10px; font-size: 12px; }
 .game-hud .side { display:flex; align-items:center; gap: 8px; }
 .game-hud .avatar.tiny { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border:1px solid #1f2937; }
 .game-hud .nm { font-weight: 700; color:#cbd5e1; }

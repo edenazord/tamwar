@@ -19,7 +19,8 @@
         </div>
         <img id="hudImgB" class="avatar tiny" alt="B"/>
       </div>
-    </div></div>`;
+    </div></div>
+    <div class="hud-right"><button id="btnResetApp" class="btn btn-ghost tiny" title="Reset test">Reset</button></div>`;
 
   function ensureMount(){
     const bar = document.querySelector('.app-bar');
@@ -27,14 +28,38 @@
     if (!bar.querySelector('#gameHud')){
       const wrap = document.createElement('div');
       wrap.innerHTML = html;
-      bar.appendChild(wrap.firstElementChild);
+      while (wrap.firstChild){ bar.appendChild(wrap.firstChild); }
     }
+  }
+  function bindReset(){
+    const btn = document.getElementById('btnResetApp');
+    if (!btn) return;
+    if (btn._bound) return; btn._bound = true;
+    btn.addEventListener('click', () => {
+      if (!confirm('Reset test e ritorno alla pagina iniziale?')) return;
+      try { window.GameState?.resetAll?.(); } catch(e){}
+      try {
+        sessionStorage.clear();
+      } catch(e){}
+      try {
+        const toRemove = [];
+        for (let i=0;i<localStorage.length;i++){
+          const k = localStorage.key(i);
+          if (!k) continue;
+          if (k.startsWith('tamwar_')) toRemove.push(k);
+        }
+        toRemove.forEach(k => localStorage.removeItem(k));
+      } catch(e){}
+      // Torna alla home (login Streamer A)
+      window.location.href = 'index.html';
+    });
   }
   function $(id){ return document.getElementById(id); }
   function setImg(el, src, fallback){ if (!el) return; el.src = src || fallback; }
   function render(){
     if (!window.GameState) return;
-    ensureMount();
+  ensureMount();
+  bindReset();
     const series = GameState.getSeries();
     const streamers = GameState.getStreamers();
     const alleg = GameState.getAllegiance();
