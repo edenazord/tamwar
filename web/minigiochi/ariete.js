@@ -1,5 +1,6 @@
 const bar = document.getElementById('bar');
 const btnPush = document.getElementById('btnPush');
+const cursor = document.getElementById('cursor');
 const hint = document.getElementById('hint');
 const nameAEl = document.getElementById('nameA');
 const nameBEl = document.getElementById('nameB');
@@ -12,6 +13,23 @@ const params = getParams();
 if (params.match && window.GameState) GameState.setCurrentMatch(params.match);
 // Team scelto su choose.html
 const MY_TEAM = sessionStorage.getItem('team'); // 'A' | 'B' | null
+let matchRunning = false;
+
+async function pollMatchStatus(){
+  if (!params.match) { matchRunning = true; return; } // no gating without match id
+  try{
+    const r = await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`);
+    if (!r.ok) return;
+    const s = await r.json();
+    matchRunning = (s && s.status === 'running');
+    // Update hint if blocked
+    if (!matchRunning && hint){
+      hint.textContent = 'In attesa che lo Streamer A avvii il Rush…';
+    }
+  }catch(e){}
+}
+pollMatchStatus();
+setInterval(pollMatchStatus, 2000);
 
 let pos = 50; // 0 = Castello A assediato (vince B), 100 = Castello B assediato (vince A)
 let lastClick = 0; // anti-autoclicker 50ms
@@ -19,6 +37,7 @@ let lastClick = 0; // anti-autoclicker 50ms
 function setPos(p) {
   pos = Math.max(0, Math.min(100, p));
   if (bar) bar.style.width = `${pos}%`;
+  if (cursor) cursor.style.left = `${pos}%`;
 }
 
 function updateHint(team){
@@ -46,6 +65,7 @@ setPos(pos);
 updateHint(MY_TEAM);
 
 if (btnPush) btnPush.addEventListener('click', () => {
+  if (!matchRunning) return; // gate: rush non iniziato
   const now = performance.now();
   if (now - lastClick < 50) return; // blocco 50ms
   lastClick = now;

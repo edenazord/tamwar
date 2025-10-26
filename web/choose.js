@@ -127,7 +127,7 @@ if (cardA && cardB) {
 
 const cards = document.querySelectorAll('.card[data-team]');
 for (const c of cards) {
-  c.addEventListener('click', () => {
+  c.addEventListener('click', async () => {
     const team = c.getAttribute('data-team');
     const name = c.querySelector('h2')?.textContent || team;
     const img = c.querySelector('img.avatar')?.getAttribute('src');
@@ -138,8 +138,20 @@ for (const c of cards) {
     sessionStorage.setItem('team', team);
     sessionStorage.setItem('teamName', name);
     sessionStorage.setItem('teamImg', img || '');
+    // Se c'è un match, attendi che sia running prima di entrare nel minigioco
+    if (params.match){
+      try{
+        const r = await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`);
+        if (r.ok){
+          const s = await r.json();
+          if (s.status !== 'running'){
+            // Rimani su choose per schieramenti, HUD continuerà ad aggiornarsi
+            return;
+          }
+        }
+      }catch(e){}
+    }
     const qs = params.match ? `?match=${encodeURIComponent(params.match)}` : '';
-    // Avvia dal nuovo percorso dei minigiochi
     window.location.href = 'minigiochi/ariete.html' + qs;
   });
 }
