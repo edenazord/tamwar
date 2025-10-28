@@ -78,19 +78,30 @@ html, body { margin:0; padding:0; height:100%; font-family: Inter, system-ui, -a
 /* Arena specific */
 .arena { position: relative; overflow: hidden; }
 .arena.siege { display: grid; grid-template-columns: 1fr minmax(320px, 2fr) 1fr; align-items: center; gap: 20px; }
-.arena.siege .side { display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 8px; min-height: 160px; }
+.arena.siege .side { display:flex; flex-direction:column; align-items:center; justify-content:center; gap: 8px; min-height: 160px; position:relative; transition: transform .2s ease, filter .2s ease, opacity .2s ease; }
+.arena.siege .side::before { content:""; position:absolute; inset:-6px; border-radius:18px; background: radial-gradient(circle at center, transparent 35%, rgba(255,255,255,0.06) 100%); opacity:0; pointer-events:none; transition: opacity .2s ease; }
+.arena.siege .side.is-leading { transform: translateY(-6px); filter: drop-shadow(0 0 18px rgba(251,191,36,0.4)); }
+.arena.siege .side.is-leading::before { opacity:1; }
+.arena.siege .side.is-trailing { opacity:0.65; }
 .arena.siege .side .castle { font-size: 80px; filter: drop-shadow(0 6px 22px #0008); }
 .arena.siege .side .nm { font-weight: 800; letter-spacing: .5px; text-shadow: 0 2px 0 #0009; }
 .arena.siege .center { display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .bar-wrap { position: relative; height: 28px; border-radius: 999px; border:1px solid #1f2937; background: #0b0f17; overflow:hidden; margin: 24px 0; }
 .bar-bg { position:absolute; inset:0; background: repeating-linear-gradient(90deg, #0f172a, #0f172a 10px, #111827 10px, #111827 20px); opacity:.7; }
-.bar-fill { position:absolute; left:0; top:0; bottom:0; width: 50%; background: linear-gradient(90deg, #ef4444, #22d3ee); box-shadow: inset 0 0 18px #22d3ee66; transition: width .25s ease; }
+.bar-fill { position:absolute; left:0; top:0; bottom:0; width: 50%; background: linear-gradient(90deg, #ef4444, #22d3ee); box-shadow: inset 0 0 18px #22d3ee66; transition: width .25s ease, background .25s ease; }
+.bar-fill.lead-a { background: linear-gradient(90deg, #22d3ee, #38bdf8); box-shadow: inset 0 0 22px #38bdf866; }
+.bar-fill.lead-b { background: linear-gradient(90deg, #f97316, #ef4444); box-shadow: inset 0 0 22px #ef444466; }
 .gradient-accent { background: linear-gradient(90deg, #ef4444, #f59e0b, #22d3ee); }
 .bar-cursor { position:absolute; top:-6px; bottom:-6px; width: 4px; background: #fbbf24; left:50%; transform: translateX(-50%); box-shadow: 0 0 10px #fbbf2488; transition: left .12s ease; }
 .checkpoints { position:absolute; inset:0; pointer-events:none; }
 .checkpoints::before { content:""; position:absolute; left:33%; top:0; bottom:0; width:2px; background:#222; box-shadow: 0 0 12px #fff2; }
 .checkpoints::after { content:""; position:absolute; left:66%; top:0; bottom:0; width:2px; background:#222; box-shadow: 0 0 12px #fff2; }
 .actions { display:flex; flex-direction: column; gap:8px; justify-content:center; align-items: center; margin-top: 16px; }
+.lead-status { min-height: 26px; font-weight: 700; letter-spacing: .4px; text-transform: uppercase; font-size: 14px; color: var(--muted); text-align:center; transition: color .2s ease, text-shadow .2s ease, transform .2s ease; }
+.lead-status.state-a { color: #38bdf8; text-shadow: 0 0 12px #38bdf855; }
+.lead-status.state-b { color: #f97316; text-shadow: 0 0 12px #f9731655; }
+.lead-status.state-tie { color: #cbd5f5; text-shadow: 0 0 8px #8b5cf622; }
+.lead-status.state-final { color: var(--gold); font-size: 16px; text-shadow: 0 0 16px rgba(251,191,36,0.45); transform: translateY(4px); }
 .powers { display:flex; gap:8px; justify-content:center; margin-top: 10px; }
 .feed { margin-top: 16px; font-family: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; color:#a5b4fc; max-height: 160px; overflow:auto; border-top:1px dashed #223; padding-top:10px; }
 .curve { width: 100%; height: 220px; background: linear-gradient(180deg, #0b0f17, #0f172a); border:1px solid #1f2937; border-radius: 12px; }
