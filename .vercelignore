@@ -1,5 +1,6 @@
-# Exclude debug API routes from Vercel deployment
-api/debug/
+# Exclude most debug API routes, but keep the db-ping check
+api/debug/**
+!api/debug/db-ping.js
 
 # Exclude duplicate dynamic match routes; we use flat endpoints instead
 api/matches/[id].js
