@@ -1,0 +1,12 @@
+# Exclude debug API routes from Vercel deployment
+api/debug/
+
+# Exclude duplicate dynamic match routes; we use flat endpoints instead
+api/matches/[id].js
+api/matches/[id]/
+api/matches/ping.js
+
+# Local dev helpers
+serve.cmd
+serve.ps1
+server.js
