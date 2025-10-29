@@ -36,7 +36,20 @@ function getMyPool() {
   const baseOpts = { waitForConnections: true, connectionLimit: 5, queueLimit: 0 };
   const sslOpt = MYSQL_SSL_ENABLED ? { ssl: { rejectUnauthorized: false } } : {};
   if (MYSQL_URL) {
-    MY_POOL = mysql.createPool({ uri: MYSQL_URL, ...baseOpts, ...sslOpt });
+    // Parse the URL to feed explicit fields (mysql2 doesn't support { uri } reliably in all versions)
+    let u;
+    try { u = new URL(MYSQL_URL); }
+    catch (e) { throw new Error('MYSQL_URL_PARSE_ERROR: ' + (e && e.message || 'invalid')); }
+    const dbName = (u.pathname || '').replace(/^\//, '') || undefined;
+    MY_POOL = mysql.createPool({
+      host: u.hostname,
+      port: Number(u.port || '3306'),
+      user: decodeURIComponent(u.username || ''),
+      password: decodeURIComponent(u.password || ''),
+      database: dbName,
+      ...baseOpts,
+      ...sslOpt
+    });
   } else {
     MY_POOL = mysql.createPool({
       host: MYSQL_HOST,
