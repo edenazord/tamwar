@@ -13,7 +13,7 @@
   <main class="container">
     <h1 class="title-medieval">Assedio all'Ariete</h1>
     <div class="arena card glass pop-in siege">
-      <div class="side left">
+      <div class="side left" id="sideA">
         <div class="castle" aria-hidden="true">🏰</div>
         <div id="nameA" class="nm">Re A</div>
       </div>
@@ -23,12 +23,13 @@
           <div id="bar" class="bar-fill gradient-accent"></div>
           <div id="cursor" class="bar-cursor" aria-hidden="true"></div>
         </div>
+        <div id="leadStatus" class="lead-status" aria-live="polite"></div>
         <div class="actions">
           <button id="btnPush" class="btn btn-primary big pulse">Spingi</button>
           <div id="hint" class="sub" style="margin-top:6px;opacity:.9"></div>
         </div>
       </div>
-      <div class="side right">
+      <div class="side right" id="sideB">
         <div id="nameB" class="nm">Re B</div>
         <div class="castle" aria-hidden="true">🏰</div>
       </div>
