@@ -91,11 +91,31 @@ const server = http.createServer(async (req, res) => {
     MATCHES.set(id, record);
     return send(res, 200, JSON.stringify({ ok: true, id, inviteKey }), { 'Content-Type': 'application/json' });
   }
+  // Flat endpoint: /api/matches/get?id=...
+  if (pathname === '/api/matches/get' && req.method === 'GET') {
+    const id = parsed.query?.id || '';
+    if (!id) return send(res, 400, JSON.stringify({ error: 'missing id' }), { 'Content-Type': 'application/json' });
+    const rec = MATCHES.get(id);
+    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    return send(res, 200, JSON.stringify({ id: rec.id, status: rec.status, ownerA: rec.ownerA, invitedB: rec.invitedB, config: rec.config }), { 'Content-Type': 'application/json' });
+  }
   if (pathname.match(/^\/api\/matches\/[^/]+$/) && req.method === 'GET') {
     const id = pathname.split('/').pop();
     const rec = MATCHES.get(id);
     if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
     return send(res, 200, JSON.stringify({ id: rec.id, status: rec.status, ownerA: rec.ownerA, invitedB: rec.invitedB, config: rec.config }), { 'Content-Type': 'application/json' });
+  }
+  // Flat endpoint: /api/matches/invite-check?id=...&token=...
+  if (pathname === '/api/matches/invite-check' && req.method === 'GET') {
+    const id = parsed.query?.id || '';
+    const token = parsed.query?.token || '';
+    if (!id || !token) return send(res, 400, JSON.stringify({ error: 'missing id or token' }), { 'Content-Type': 'application/json' });
+    const rec = MATCHES.get(id);
+    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    if (rec.status !== 'invited' || !rec.inviteKey || token !== rec.inviteKey) {
+      return send(res, 410, JSON.stringify({ ok: false, error: 'invite consumed or invalid' }), { 'Content-Type': 'application/json' });
+    }
+    return send(res, 200, JSON.stringify({ ok: true }), { 'Content-Type': 'application/json' });
   }
   if (pathname.match(/^\/api\/matches\/[^/]+\/invite-check$/) && req.method === 'GET') {
     const id = pathname.split('/')[3];
@@ -106,6 +126,22 @@ const server = http.createServer(async (req, res) => {
       return send(res, 410, JSON.stringify({ ok: false, error: 'invite consumed or invalid' }), { 'Content-Type': 'application/json' });
     }
     return send(res, 200, JSON.stringify({ ok: true }), { 'Content-Type': 'application/json' });
+  }
+  // Flat endpoint: /api/matches/accept
+  if (pathname === '/api/matches/accept' && req.method === 'POST') {
+    const body = await parseBody(req);
+    const id = body.id;
+    if (!id) return send(res, 400, JSON.stringify({ error: 'missing id' }), { 'Content-Type': 'application/json' });
+    const rec = MATCHES.get(id);
+    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    if (rec.status !== 'invited' || !rec.inviteKey) return send(res, 410, JSON.stringify({ error: 'already accepted' }), { 'Content-Type': 'application/json' });
+    if (body.token !== rec.inviteKey) return send(res, 403, JSON.stringify({ error: 'bad token' }), { 'Content-Type': 'application/json' });
+    if (!body.b || !body.b.id) return send(res, 400, JSON.stringify({ error: 'b required' }), { 'Content-Type': 'application/json' });
+    rec.invitedB = body.b;
+    if (rec.config && rec.config.names) { rec.config.names.B = body.b.name || rec.config.names.B; }
+    rec.status = 'accepted';
+    rec.inviteKey = null; // invalidate invite link
+    return send(res, 200, JSON.stringify({ ok: true, id, status: rec.status }), { 'Content-Type': 'application/json' });
   }
   if (pathname.match(/^\/api\/matches\/[^/]+\/accept$/) && req.method === 'POST') {
     const id = pathname.split('/')[3];
@@ -120,6 +156,17 @@ const server = http.createServer(async (req, res) => {
     rec.status = 'accepted';
     rec.inviteKey = null; // invalidate invite link
     return send(res, 200, JSON.stringify({ ok: true, id, status: rec.status }), { 'Content-Type': 'application/json' });
+  }
+  // Flat endpoint: /api/matches/start
+  if (pathname === '/api/matches/start' && req.method === 'POST') {
+    const body = await parseBody(req);
+    const id = body.id;
+    if (!id) return send(res, 400, JSON.stringify({ error: 'missing id' }), { 'Content-Type': 'application/json' });
+    const rec = MATCHES.get(id);
+    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    if (!body.actor || body.actor !== rec.ownerA.id) return send(res, 403, JSON.stringify({ error: 'owner only' }), { 'Content-Type': 'application/json' });
+    rec.status = 'running';
+    return send(res, 200, JSON.stringify({ ok: true, status: rec.status }), { 'Content-Type': 'application/json' });
   }
   if (pathname.match(/^\/api\/matches\/[^/]+\/start$/) && req.method === 'POST') {
     const id = pathname.split('/')[3];
