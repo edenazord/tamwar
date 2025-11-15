@@ -18,6 +18,7 @@
   const startBox = document.getElementById('startBox');
   const btnStart = document.getElementById('btnStart');
   const btnWaiting = document.getElementById('btnWaiting');
+  const btnReinvite = document.getElementById('btnReinvite');
   const preCardA = document.querySelector('#prestartPanel .card[data-team="A"]');
   const preCardB = document.querySelector('#prestartPanel .card[data-team="B"]');
 
@@ -97,6 +98,9 @@
     if ((role==='A' || role==='B') && prePanel) { prePanel.style.display = ''; startPrestartRender(); }
   }
   btnLoginA?.addEventListener('click', ()=>{ sessionStorage.setItem('after_login', location.href); Auth.login('A'); });
+
+  // Porta visibile per evitare mismatch
+  try{ const p = (location.port||'').trim(); const outPort = document.getElementById('curPort'); if (outPort) outPort.textContent = p || (location.protocol==='https:'?'443':'80'); }catch(e){}
 
   async function ensureRoleA(){
     if (!window.Auth) return; // allow in demo if auth missing
@@ -235,6 +239,38 @@
       }
     }, 2000);
   }
+
+  // Rigenera manualmente un invito fresco (solo A)
+  btnReinvite?.addEventListener('click', async () => {
+    const ok = await ensureRoleA(); if (!ok) return;
+    const u = window.Auth?.currentUser();
+    const nameA = u?.display_name || 'Streamer A';
+    const nameB = '';
+    const bo = getBestOf();
+    const mg = Math.max(1, Math.min(9, parseInt(val('mgpr')||'3',10)));
+    const id = randId();
+    try {
+      const resp = await fetch('/api/matches', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ matchId: id, ownerA: { id: u.id, name: nameA }, config: { bestOf: bo, minigamesPerRush: mg, names: { A: nameA, B: nameB } } }) });
+      if (!resp.ok) { out.textContent = 'Errore creazione match'; return; }
+      const data = await resp.json();
+      if (!data || !data.ok) { out.textContent = 'Errore creazione match'; return; }
+      const inviteKey = data.inviteKey;
+      CURRENT.id = id; CURRENT.bo = bo; CURRENT.mg = mg;
+      // aggiorna URL coerente
+      try{ const url = new URL(location.href); url.searchParams.set('match', id); history.replaceState(null, '', url.toString()); }catch(e){}
+      // mostra nuovo link privato
+      const base = location.origin + location.pathname.replace(/[^/]*$/, '');
+      const invite = `${base}?match=${encodeURIComponent(id)}&token=${encodeURIComponent(inviteKey)}`;
+      if (actionLink){ actionLink.href = invite; actionLink.textContent = invite; }
+      if (linkLabel) linkLabel.textContent = 'Link privato';
+      out.textContent = 'Nuovo invito generato. Condividilo con lo Streamer B.';
+      // salva sessione
+      sessionStorage.setItem('tam_current_match', JSON.stringify({ id, inviteKey, bo, mg }));
+      // reset stato prestart
+      if (window.GameState){ GameState.initMatch(id, { bestOf: bo, minigamesPerRush: mg, streamers: { A: { name: nameA }, B: { name: '' } } }); }
+      setStatus('waiting'); if (btnStart) btnStart.disabled = true;
+    } catch(e){ out.textContent = 'Errore rete nella creazione match'; }
+  });
 
   // Gestione iniziale: A crea/gestisce; B (se arriva con match) vede link pubblico senza owner
   (async function(){
