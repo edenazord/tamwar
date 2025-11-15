@@ -23,10 +23,26 @@ const ctx = canvas.getContext('2d');
 if (window.Hud) Hud.start(1000);
 
 let wave = 1;
+let maxWaves = 3;
 let pressed = false;
 let windowStart = 0;
 let windowEnd = 0;
 let density = new Array(20).fill(0);
+let scoreA = 0, scoreB = 0;
+const MY_TEAM = sessionStorage.getItem('team'); // 'A' | 'B' | null
+let matchRunning = false;
+
+async function pollMatchStatus(){
+  if (!params.match) { matchRunning = true; return; }
+  try{
+    const r = await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`);
+    if (!r.ok) return;
+    const s = await r.json();
+    matchRunning = (s && s.status === 'running');
+  }catch(e){}
+}
+pollMatchStatus();
+setInterval(pollMatchStatus, 2000);
 
 function resize() {
   canvas.width = canvas.clientWidth * devicePixelRatio;
@@ -76,32 +92,75 @@ function simulateCrowd() {
 setInterval(simulateCrowd, 60);
 
 btnCharge.addEventListener('click', () => {
-  if (!isHost) return; // solo l'host può dare il via
+  if (!matchRunning) return;
   if (pressed) return; pressed = true;
+  const team = MY_TEAM || 'A';
   // mappa click in un bucket temporale (mock)
   const t = 2000; // ms
   const when = Math.floor(Math.random()*t);
   const bucket = Math.min(density.length-1, Math.floor((when/2500)*density.length));
-  density[bucket] += 10; // contributo locale
+  const inWindow = when >= windowStart && when <= windowEnd;
+  const points = inWindow ? 10 : 2;
+  
+  if (team === 'A') scoreA += points;
+  else scoreB += points;
+  
+  density[bucket] += points; // contributo locale
   draw();
-  if (feed) feed.prepend(Object.assign(document.createElement('div'), { textContent: 'Carica!' }));
+  if (feed) feed.prepend(Object.assign(document.createElement('div'), { 
+    textContent: `Carica! ${inWindow ? '✓' : '✗'}`,
+    style: `color: ${inWindow ? '#22c55e' : '#ef4444'}`
+  }));
 });
 
-setInterval(() => {
+const waveInterval = setInterval(() => {
   wave++;
   const waveEl = document.getElementById('wave');
   if (waveEl) waveEl.textContent = `Ondata ${wave}`;
+  
+  if (wave > maxWaves) {
+    clearInterval(waveInterval);
+    endGame();
+    return;
+  }
+  
   newWave();
 }, 3500);
 
 newWave();
 
-if (!isHost) {
-  // Messaggio di attesa per i non-host
-  const note = document.createElement('div');
-  note.className = 'subtitle text-center';
-  note.style.marginTop = '8px';
-  note.textContent = 'In attesa del via dall\'Host…';
-  btnCharge?.parentElement?.appendChild(note);
+function endGame(){
   btnCharge.disabled = true;
+  clearInterval(waveInterval);
+  
+  const winner = scoreA > scoreB ? 'A' : (scoreB > scoreA ? 'B' : null);
+  
+  if (winner) {
+    try { window.GameState?.recordMinigameWin?.(winner); } catch(e){}
+  }
+  
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed'; overlay.style.inset = '0'; overlay.style.background = 'rgba(0,0,0,.7)';
+  overlay.style.display = 'flex'; overlay.style.alignItems = 'center'; overlay.style.justifyContent = 'center';
+  overlay.style.zIndex = '99';
+  
+  const box = document.createElement('div');
+  box.className = 'card'; box.style.padding = '20px 28px'; box.style.textAlign = 'center';
+  const s = window.GameState?.getStreamers ? GameState.getStreamers() : null;
+  
+  if (winner) {
+    const name = winner==='A' ? (s?.A?.name || 'Re A') : (s?.B?.name || 'Re B');
+    box.innerHTML = `<h2 style="margin:0 0 6px">Carica vincente!</h2><div class="subtitle">Vince ${name}</div><div class="meta" style="margin-top: 8px;">${scoreA} vs ${scoreB}</div>`;
+  } else {
+    box.innerHTML = `<h2 style="margin:0 0 6px">Pareggio!</h2><div class="subtitle">Cariche equilibrate</div>`;
+  }
+  
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  
+  if (window.MinigameRouter && winner) {
+    setTimeout(() => {
+      window.MinigameRouter.navigateToNext(winner);
+    }, 3000);
+  }
 }

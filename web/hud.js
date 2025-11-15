@@ -79,8 +79,9 @@
     if ($('hudScoreB')) $('hudScoreB').textContent = st.rushWins.B||0;
     if ($('hudBestOf')) $('hudBestOf').textContent = `BO${st.bestOf}`;
     if ($('hudRushIndex')) $('hudRushIndex').textContent = st.rushIndex;
-    if ($('hudAllegA')) $('hudAllegA').textContent = alleg.A||0;
-    if ($('hudAllegB')) $('hudAllegB').textContent = alleg.B||0;
+    const maxParticipants = GameState.getMaxParticipants ? GameState.getMaxParticipants() : 500;
+    if ($('hudAllegA')) $('hudAllegA').textContent = `${alleg.A||0}/${maxParticipants}`;
+    if ($('hudAllegB')) $('hudAllegB').textContent = `${alleg.B||0}/${maxParticipants}`;
   }
   let timer = null;
   function start(intervalMs=1000){ if (timer) clearInterval(timer); render(); timer = setInterval(render, intervalMs); }

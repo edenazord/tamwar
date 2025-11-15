@@ -4,10 +4,6 @@ const cursor = document.getElementById('cursor');
 const hint = document.getElementById('hint');
 const nameAEl = document.getElementById('nameA');
 const nameBEl = document.getElementById('nameB');
-const sideA = document.getElementById('sideA');
-const sideB = document.getElementById('sideB');
-const leadStatusEl = document.getElementById('leadStatus');
-const LEAD_THRESHOLD = 5; // percent away from center to consider a clear lead
 
 function getParams(){
   const p = new URLSearchParams(location.search);
@@ -42,7 +38,6 @@ function setPos(p) {
   pos = Math.max(0, Math.min(100, p));
   if (bar) bar.style.width = `${pos}%`;
   if (cursor) cursor.style.left = `${pos}%`;
-  updateLead();
 }
 
 function updateHint(team){
@@ -62,47 +57,12 @@ function applyTeamNames(){
       if (nameBEl) nameBEl.textContent = s.B?.name || 'Re B';
     }
   }catch(e){}
-  updateLead();
 }
 applyTeamNames();
 // Imposta larghezza iniziale
 setPos(pos);
 // Hint iniziale
 updateHint(MY_TEAM);
-
-function getTeamName(team){
-  if (team === 'A') return nameAEl?.textContent || 'Re A';
-  if (team === 'B') return nameBEl?.textContent || 'Re B';
-  return '';
-}
-
-function updateLead(){
-  if (!sideA && !sideB && !leadStatusEl) return;
-  let lead = null;
-  if (pos >= 50 + LEAD_THRESHOLD) lead = 'A';
-  else if (pos <= 50 - LEAD_THRESHOLD) lead = 'B';
-
-  const tie = lead === null;
-  sideA?.classList.toggle('is-leading', lead === 'A');
-  sideA?.classList.toggle('is-trailing', lead === 'B');
-  sideB?.classList.toggle('is-leading', lead === 'B');
-  sideB?.classList.toggle('is-trailing', lead === 'A');
-  bar?.classList.toggle('lead-a', lead === 'A');
-  bar?.classList.toggle('lead-b', lead === 'B');
-  leadStatusEl?.classList.toggle('state-a', lead === 'A');
-  leadStatusEl?.classList.toggle('state-b', lead === 'B');
-  leadStatusEl?.classList.toggle('state-tie', tie);
-
-  if (leadStatusEl){
-    if (lead === 'A') {
-      leadStatusEl.textContent = `${getTeamName('A')} sta spingendo forte!`;
-    } else if (lead === 'B') {
-      leadStatusEl.textContent = `${getTeamName('B')} sta ribaltando l'assedio!`;
-    } else {
-      leadStatusEl.textContent = 'Sfida in equilibrio: chi romperà lo stallo?';
-    }
-  }
-}
 
 if (btnPush) btnPush.addEventListener('click', () => {
   if (!matchRunning) return; // gate: rush non iniziato
@@ -149,8 +109,6 @@ function checkWin() {
 function endGame(winner){
   // Disabilita input
   btnPush.disabled = true;
-  // Registra vittoria locale per la serie
-  try { window.GameState?.recordMinigameWin?.(winner); } catch(e){}
   // Overlay semplice
   const overlay = document.createElement('div');
   overlay.style.position = 'fixed'; overlay.style.inset = '0'; overlay.style.background = 'rgba(0,0,0,.7)'; overlay.style.display = 'flex'; overlay.style.alignItems = 'center'; overlay.style.justifyContent = 'center'; overlay.style.zIndex = '99';
@@ -161,11 +119,13 @@ function endGame(winner){
   box.innerHTML = `<h2 style="margin:0 0 6px">Assedio riuscito!</h2><div class="subtitle">Vince ${name}</div>`;
   overlay.appendChild(box);
   document.body.appendChild(overlay);
-  leadStatusEl?.classList.remove('state-a', 'state-b', 'state-tie');
-  leadStatusEl?.classList.add('state-final');
-  if (leadStatusEl) leadStatusEl.textContent = `Assedio riuscito! ${name} conquista il castello.`;
-  sideA?.classList.remove('is-leading', 'is-trailing');
-  sideB?.classList.remove('is-leading', 'is-trailing');
+  
+  // Usa il router per navigare al prossimo minigioco
+  if (window.MinigameRouter && winner) {
+    setTimeout(() => {
+      window.MinigameRouter.navigateToNext(winner);
+    }, 3000);
+  }
 }
 
 // Osserva i cambi di posizione ed esegue check vittoria

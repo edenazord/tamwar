@@ -64,10 +64,11 @@
       }
     }catch(e){}
     const s2 = window.GameState?.getStreamers ? GameState.getStreamers() : {};
+    const maxParticipants = window.GameState?.getMaxParticipants ? GameState.getMaxParticipants() : 500;
     if (preNameA) preNameA.textContent = s2?.A?.name || 'Streamer A';
     if (preNameB) preNameB.textContent = s2?.B?.name || 'Streamer B';
-    if (preCountA) preCountA.textContent = counts?.A || 0;
-    if (preCountB) preCountB.textContent = counts?.B || 0;
+    if (preCountA) preCountA.textContent = `${counts?.A || 0}/${maxParticipants}`;
+    if (preCountB) preCountB.textContent = `${counts?.B || 0}/${maxParticipants}`;
     setImg(preImgA, s2?.A?.img);
     setImg(preImgB, s2?.B?.img);
   }
