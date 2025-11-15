@@ -1,0 +1,20 @@
+{
+  "4rqn6d-55kl": {
+    "id": "4rqn6d-55kl",
+    "ownerA": {
+      "id": "demo_2bssa059tdc",
+      "name": "edea"
+    },
+    "invitedB": null,
+    "config": {
+      "bestOf": 3,
+      "minigamesPerRush": 3,
+      "names": {
+        "A": "edea",
+        "B": ""
+      }
+    },
+    "status": "invited",
+    "inviteKey": "zsqjb206umemi0l55ky"
+  }
+}
