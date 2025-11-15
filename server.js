@@ -99,6 +99,28 @@ const server = http.createServer(async (req, res) => {
   }
 
   // API routes
+  // Debug: list matches
+  if (pathname === '/api/debug/list' && req.method === 'GET') {
+    const list = [];
+    for (const [id, rec] of MATCHES.entries()) {
+      list.push({ id, status: rec.status, ownerA: rec.ownerA, invitedB: rec.invitedB, hasInviteKey: !!rec.inviteKey, inviteKey: rec.inviteKey });
+    }
+    return send(res, 200, JSON.stringify({ ok: true, count: list.length, matches: list }), { 'Content-Type': 'application/json' });
+  }
+  // Debug: seed a match with known token
+  if (pathname === '/api/debug/seed' && req.method === 'GET') {
+    const id = parsed.query?.id || parsed.query?.matchId || '';
+    const owner = parsed.query?.owner || 'devA';
+    const name = parsed.query?.name || 'Streamer A';
+    const token = parsed.query?.token || ('debug-' + Math.random().toString(36).slice(2));
+    if (!id) return send(res, 400, JSON.stringify({ error: 'id required' }), { 'Content-Type': 'application/json' });
+    const rec = MATCHES.get(id) || { id, ownerA: { id: owner, name }, invitedB: null, config: { bestOf: 3, minigamesPerRush: 3, names: { A: name, B: '' } }, status: 'invited', inviteKey: token };
+    rec.inviteKey = token;
+    rec.status = 'invited';
+    MATCHES.set(id, rec);
+    saveMatchesToDisk();
+    return send(res, 200, JSON.stringify({ ok: true, id, token }), { 'Content-Type': 'application/json' });
+  }
   if (pathname === '/api/matches' && req.method === 'POST') {
     const body = await parseBody(req);
     const id = body.matchId;
