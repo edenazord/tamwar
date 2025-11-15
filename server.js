@@ -1,9 +1,14 @@
 #!/usr/bin/env node
-const http = require('http');
-const fs = require('fs');
-const path = require('path');
-const url = require('url');
-const { spawn } = require('child_process');
+import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import url from 'url';
+import { spawn } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const args = process.argv.slice(2);
 let port = 5173;
