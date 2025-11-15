@@ -89,6 +89,7 @@ const server = http.createServer(async (req, res) => {
       inviteKey
     };
     MATCHES.set(id, record);
+    console.log(`[create] Match created: ${id}, InviteKey: ${inviteKey}, Total matches: ${MATCHES.size}`);
     return send(res, 200, JSON.stringify({ ok: true, id, inviteKey }), { 'Content-Type': 'application/json' });
   }
   // Flat endpoint: /api/matches/get?id=...
@@ -111,8 +112,13 @@ const server = http.createServer(async (req, res) => {
     const token = parsed.query?.token || '';
     if (!id || !token) return send(res, 400, JSON.stringify({ error: 'missing id or token' }), { 'Content-Type': 'application/json' });
     const rec = MATCHES.get(id);
-    if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    console.log(`[invite-check] Match ID: ${id}, Token: ${token}, Found: ${!!rec}, Status: ${rec?.status}, InviteKey: ${rec?.inviteKey}`);
+    if (!rec) {
+      console.log(`[invite-check] Match not found. Total matches in memory: ${MATCHES.size}`);
+      return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
+    }
     if (rec.status !== 'invited' || !rec.inviteKey || token !== rec.inviteKey) {
+      console.log(`[invite-check] Invalid: status=${rec.status}, hasKey=${!!rec.inviteKey}, tokenMatch=${token === rec.inviteKey}`);
       return send(res, 410, JSON.stringify({ ok: false, error: 'invite consumed or invalid' }), { 'Content-Type': 'application/json' });
     }
     return send(res, 200, JSON.stringify({ ok: true }), { 'Content-Type': 'application/json' });
