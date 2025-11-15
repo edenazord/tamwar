@@ -13,6 +13,7 @@ const __dirname = dirname(__filename);
 const args = process.argv.slice(2);
 let port = 5173;
 let root = path.join(__dirname, 'web');
+const DATA_FILE = path.join(__dirname, '.dev-matches.json');
 for (let i = 0; i < args.length; i++) {
   if (args[i] === '--port' && args[i+1]) { port = parseInt(args[++i], 10) || port; }
   else if ((args[i] === '--root' || args[i] === '-r') && args[i+1]) { root = path.resolve(args[++i]); }
@@ -50,6 +51,31 @@ function safePath(p) {
 
 // In-memory store for matches (demo only)
 const MATCHES = new Map();
+
+function loadMatchesFromDisk() {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, 'utf-8');
+      const obj = JSON.parse(raw || '{}');
+      Object.keys(obj).forEach((k) => MATCHES.set(k, obj[k]));
+      console.log(`[dev-store] Loaded ${MATCHES.size} match(es) from ${path.basename(DATA_FILE)}`);
+    }
+  } catch (e) {
+    console.warn('[dev-store] Failed to load dev store:', e.message);
+  }
+}
+
+function saveMatchesToDisk() {
+  try {
+    const obj = {};
+    for (const [k, v] of MATCHES.entries()) obj[k] = v;
+    fs.writeFileSync(DATA_FILE, JSON.stringify(obj, null, 2));
+  } catch (e) {
+    console.warn('[dev-store] Failed to save dev store:', e.message);
+  }
+}
+
+loadMatchesFromDisk();
 function parseBody(req) {
   return new Promise((resolve) => {
     let data = '';
@@ -90,6 +116,7 @@ const server = http.createServer(async (req, res) => {
     };
     MATCHES.set(id, record);
     console.log(`[create] Match created: ${id}, InviteKey: ${inviteKey}, Total matches: ${MATCHES.size}`);
+    saveMatchesToDisk();
     return send(res, 200, JSON.stringify({ ok: true, id, inviteKey }), { 'Content-Type': 'application/json' });
   }
   // Flat endpoint: /api/matches/get?id=...
@@ -147,6 +174,7 @@ const server = http.createServer(async (req, res) => {
     if (rec.config && rec.config.names) { rec.config.names.B = body.b.name || rec.config.names.B; }
     rec.status = 'accepted';
     rec.inviteKey = null; // invalidate invite link
+    saveMatchesToDisk();
     return send(res, 200, JSON.stringify({ ok: true, id, status: rec.status }), { 'Content-Type': 'application/json' });
   }
   if (pathname.match(/^\/api\/matches\/[^/]+\/accept$/) && req.method === 'POST') {
@@ -161,6 +189,7 @@ const server = http.createServer(async (req, res) => {
     if (rec.config && rec.config.names) { rec.config.names.B = body.b.name || rec.config.names.B; }
     rec.status = 'accepted';
     rec.inviteKey = null; // invalidate invite link
+    saveMatchesToDisk();
     return send(res, 200, JSON.stringify({ ok: true, id, status: rec.status }), { 'Content-Type': 'application/json' });
   }
   // Flat endpoint: /api/matches/start
@@ -172,6 +201,7 @@ const server = http.createServer(async (req, res) => {
     if (!rec) return send(res, 404, JSON.stringify({ error: 'not found' }), { 'Content-Type': 'application/json' });
     if (!body.actor || body.actor !== rec.ownerA.id) return send(res, 403, JSON.stringify({ error: 'owner only' }), { 'Content-Type': 'application/json' });
     rec.status = 'running';
+    saveMatchesToDisk();
     return send(res, 200, JSON.stringify({ ok: true, status: rec.status }), { 'Content-Type': 'application/json' });
   }
   if (pathname.match(/^\/api\/matches\/[^/]+\/start$/) && req.method === 'POST') {
@@ -181,6 +211,7 @@ const server = http.createServer(async (req, res) => {
     const body = await parseBody(req);
     if (!body.actor || body.actor !== rec.ownerA.id) return send(res, 403, JSON.stringify({ error: 'owner only' }), { 'Content-Type': 'application/json' });
     rec.status = 'running';
+    saveMatchesToDisk();
     return send(res, 200, JSON.stringify({ ok: true, status: rec.status }), { 'Content-Type': 'application/json' });
   }
 
