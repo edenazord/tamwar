@@ -109,8 +109,6 @@ function checkWin() {
 function endGame(winner){
   // Disabilita input
   btnPush.disabled = true;
-  // Registra vittoria locale per la serie
-  try { window.GameState?.recordMinigameWin?.(winner); } catch(e){}
   // Overlay semplice
   const overlay = document.createElement('div');
   overlay.style.position = 'fixed'; overlay.style.inset = '0'; overlay.style.background = 'rgba(0,0,0,.7)'; overlay.style.display = 'flex'; overlay.style.alignItems = 'center'; overlay.style.justifyContent = 'center'; overlay.style.zIndex = '99';
@@ -121,6 +119,13 @@ function endGame(winner){
   box.innerHTML = `<h2 style="margin:0 0 6px">Assedio riuscito!</h2><div class="subtitle">Vince ${name}</div>`;
   overlay.appendChild(box);
   document.body.appendChild(overlay);
+  
+  // Usa il router per navigare al prossimo minigioco
+  if (window.MinigameRouter && winner) {
+    setTimeout(() => {
+      window.MinigameRouter.navigateToNext(winner);
+    }, 3000);
+  }
 }
 
 // Osserva i cambi di posizione ed esegue check vittoria

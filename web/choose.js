@@ -116,11 +116,19 @@ if (cardA && cardB) {
       GameState.setStreamers({ A: { name: names.a }, B: { name: names.b } });
       // Render counters
       const counts = GameState.getAllegiance();
+      const maxParticipants = GameState.getMaxParticipants ? GameState.getMaxParticipants() : 500;
       const aCountEl = cardA.querySelector('[data-count="A"]');
       const bCountEl = cardB.querySelector('[data-count="B"]');
-      if (aCountEl) aCountEl.textContent = counts.A ?? 0;
-      if (bCountEl) bCountEl.textContent = counts.B ?? 0;
+      if (aCountEl) aCountEl.textContent = `${counts.A ?? 0}/${maxParticipants}`;
+      if (bCountEl) bCountEl.textContent = `${counts.B ?? 0}/${maxParticipants}`;
       if (window.Hud) Hud.render();
+      
+      // Aggiorna contatori periodicamente
+      setInterval(() => {
+        const updatedCounts = GameState.getAllegiance();
+        if (aCountEl) aCountEl.textContent = `${updatedCounts.A ?? 0}/${maxParticipants}`;
+        if (bCountEl) bCountEl.textContent = `${updatedCounts.B ?? 0}/${maxParticipants}`;
+      }, 2000);
     }
   })();
 }
@@ -131,10 +139,60 @@ for (const c of cards) {
     const team = c.getAttribute('data-team');
     const name = c.querySelector('h2')?.textContent || team;
     const img = c.querySelector('img.avatar')?.getAttribute('src');
+    
+    // Controlla il limite prima di permettere l'iscrizione
     if (window.GameState && (team==='A' || team==='B')) {
-      GameState.incrementAllegiance(team);
+      const counts = GameState.getAllegiance();
+      const maxParticipants = GameState.getMaxParticipants ? GameState.getMaxParticipants() : 500;
+      const currentCount = counts[team] || 0;
+      
+      if (currentCount >= maxParticipants) {
+        // Mostra messaggio di limite raggiunto
+        const countEl = c.querySelector('[data-count="' + team + '"]');
+        const originalText = countEl ? countEl.textContent : '';
+        if (countEl) {
+          countEl.textContent = 'LIMITE RAGGIUNTO';
+          countEl.style.color = '#ef4444';
+          countEl.style.animation = 'pulse 0.5s ease';
+        }
+        
+        // Mostra toast/notifica
+        const toast = document.createElement('div');
+        toast.style.position = 'fixed';
+        toast.style.top = '20px';
+        toast.style.left = '50%';
+        toast.style.transform = 'translateX(-50%)';
+        toast.style.background = 'rgba(239, 68, 68, 0.9)';
+        toast.style.color = 'white';
+        toast.style.padding = '12px 24px';
+        toast.style.borderRadius = '8px';
+        toast.style.zIndex = '9999';
+        toast.style.fontWeight = '600';
+        toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+        toast.textContent = `Limite di ${maxParticipants} partecipanti raggiunto per ${name}!`;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          if (countEl) {
+            countEl.textContent = originalText;
+            countEl.style.color = '';
+            countEl.style.animation = '';
+          }
+          toast.remove();
+        }, 3000);
+        
+        return; // Blocca l'iscrizione
+      }
+      
+      // Incrementa solo se sotto il limite
+      const newCount = GameState.incrementAllegiance(team);
       if (window.Hud) Hud.render();
+      
+      // Aggiorna il contatore visuale
+      const countEl = c.querySelector('[data-count="' + team + '"]');
+      if (countEl) countEl.textContent = `${newCount}/${maxParticipants}`;
     }
+    
     sessionStorage.setItem('team', team);
     sessionStorage.setItem('teamName', name);
     sessionStorage.setItem('teamImg', img || '');

@@ -42,6 +42,8 @@
     return id ? { id, m: s.matches[id] } : null;
   }
 
+  const MAX_PARTICIPANTS = 500; // Limite massimo partecipanti per team
+
   const api = {
     resetAll(){ save(CLONE(DEF)); },
     getRaw(){ return load(); },
@@ -59,8 +61,12 @@
     // Allegiance tied to current rush
     incrementAllegiance(team){ const s = load(); const cur = current(s); if (!cur) return 0; const m = cur.m; const r = m.progress.rushIndex;
       if (!m.allegianceByRush[r]) m.allegianceByRush[r] = { A:0, B:0 };
-      m.allegianceByRush[r][team] = (m.allegianceByRush[r][team]||0) + 1; save(s); return m.allegianceByRush[r][team]; },
+      const current = m.allegianceByRush[r][team] || 0;
+      // Controlla il limite prima di incrementare
+      if (current >= MAX_PARTICIPANTS) return current; // Ritorna il valore attuale senza incrementare
+      m.allegianceByRush[r][team] = current + 1; save(s); return m.allegianceByRush[r][team]; },
     getAllegiance(){ const s = load(); const cur = current(s); if (!cur) return {A:0,B:0}; const m=cur.m; const r=m.progress.rushIndex; return CLONE(m.allegianceByRush[r] || {A:0,B:0}); },
+    getMaxParticipants(){ return MAX_PARTICIPANTS; },
     // Streamers meta on current match
     setStreamers(meta){ const s = load(); const cur=current(s); if (!cur) return; const m=cur.m; if (meta && meta.A) m.config.streamers.A = { ...m.config.streamers.A, ...meta.A }; if (meta && meta.B) m.config.streamers.B = { ...m.config.streamers.B, ...meta.B }; save(s); },
     getStreamers(){ const s=load(); const cur=current(s); return cur? CLONE(cur.m.config.streamers) : {A:{name:'Re A',img:''},B:{name:'Re B',img:''}}; },
