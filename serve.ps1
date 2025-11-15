@@ -9,10 +9,4 @@ if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
   exit 1
 }
 
-# Apri il browser dopo un piccolo delay mentre parte il server
-Start-Job -ScriptBlock {
-  Start-Sleep -Seconds 1
-  Start-Process "http://localhost:$using:Port/"
-} | Out-Null
-
 node "$PSScriptRoot\server.js" --port $Port --root $root
