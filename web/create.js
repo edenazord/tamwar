@@ -128,7 +128,24 @@
     const user = window.Auth?.currentUser() || { id: 'demoA', display_name: 'StreamerA' };
     // if new or status unknown, create a fresh match
     let inviteKey = cur?.inviteKey || null;
-    if (!cur){
+    // Se esiste una partita in sessione, verifica che l'invito sia ancora valido.
+    if (cur && inviteKey){
+      try{
+        const chk = await fetch(`/api/matches/invite-check?id=${encodeURIComponent(id)}&token=${encodeURIComponent(inviteKey)}`);
+        if (!chk.ok){
+          // invito non valido: crea una nuova partita fresca
+          id = randId();
+          CURRENT.id = id;
+          const respNew = await fetch('/api/matches', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ matchId: id, ownerA: { id: user.id, name: user.display_name }, config: { bestOf: bo, minigamesPerRush: mg, names: { A: nameA, B: nameB } } }) });
+          if (!respNew.ok) { out.textContent = 'Errore creazione match (server non disponibile)'; return; }
+          const dataNew = await respNew.json();
+          if (!dataNew || !dataNew.ok){ out.textContent = 'Errore creazione match'; return; }
+          inviteKey = dataNew.inviteKey;
+          sessionStorage.setItem('tam_current_match', JSON.stringify({ id, inviteKey, bo, mg }));
+        }
+      } catch(e){ /* in caso di errore rete, prosegui e tenterai comunque con il link corrente */ }
+    }
+    if (!cur || !inviteKey){
       try {
         const resp = await fetch('/api/matches', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ matchId: id, ownerA: { id: user.id, name: user.display_name }, config: { bestOf: bo, minigamesPerRush: mg, names: { A: nameA, B: nameB } } }) });
         if (!resp.ok) { out.textContent = 'Errore creazione match (server non disponibile)'; return; }

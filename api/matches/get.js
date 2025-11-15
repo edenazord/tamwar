@@ -11,7 +11,9 @@ export default async function handler(req, res) {
     const rec = await getMatch(id);
     if (!rec) return sendJson(res, 404, { error: 'not found' });
     const { inviteKey, ...safe } = rec;
-    return sendJson(res, 200, safe);
+    // Uniforma il campo id nell'output per il frontend (compat con server locale)
+    const idOut = rec.matchId || rec.id || id;
+    return sendJson(res, 200, { id: idOut, ...safe });
   } catch (e) {
     return sendJson(res, 500, { error: 'internal' });
   }
