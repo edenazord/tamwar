@@ -11,8 +11,13 @@
       // Check invite availability first
   const chk = await fetch(`/api/matches/invite-check?id=${encodeURIComponent(params.match)}&token=${encodeURIComponent(params.token)}`);
       if (!chk.ok){
-        desc.textContent = 'Invito non valido o già usato.';
-        btnLoginB.disabled = true; btnAccept.disabled = true;
+        // Messaggi più specifici in base allo status
+        if (chk.status === 404) desc.textContent = 'Invito non trovato. Chiedi allo Streamer A un nuovo link.';
+        else if (chk.status === 410) desc.textContent = 'Invito non valido o già usato.';
+        else if (chk.status === 503) desc.textContent = 'Servizio non configurato. Contatta l\'amministratore.';
+        else desc.textContent = 'Invito non valido.';
+        // Consenti comunque il login, ma disabilita l'accettazione
+        if (btnAccept) btnAccept.disabled = true;
         return;
       }
   const s = await (await fetch(`/api/matches/get?id=${encodeURIComponent(params.match)}`)).json();
